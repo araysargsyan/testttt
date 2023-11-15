@@ -1,0 +1,69 @@
+import {
+    UserOutlined,
+    TransactionOutlined,
+    OrderedListOutlined,
+    TeamOutlined,
+    DashboardOutlined,
+} from '@ant-design/icons';
+import React, { type ReactNode } from 'react';
+
+
+export const ProtectedPages = {
+    main: '/',
+    users: '/users',
+    admins: '/admins',
+    orderProcess: '/order-process',
+    transaction: '/transactions',
+} as const;
+
+
+export interface ISideBarMenuOptions {
+    path: string;
+    name: string;
+    icon: ReactNode
+}
+export const sideBarMenuOptions: Array<ISideBarMenuOptions> = [
+    {
+        name: 'Dashboard',
+        path: ProtectedPages.main,
+        icon: <DashboardOutlined />
+    },
+    {
+        name: 'Users',
+        path: ProtectedPages.users,
+        icon: <UserOutlined />
+    },
+    {
+        name: 'Admins',
+        path: ProtectedPages.admins,
+        icon: <TeamOutlined />
+    },
+    {
+        name: 'Order Process',
+        path: ProtectedPages.orderProcess,
+        icon: <OrderedListOutlined />
+    },
+    {
+        name: 'Transactions',
+        path: ProtectedPages.transaction,
+        icon: <TransactionOutlined />
+    }
+];
+export const fakeUsers = [
+    {
+        id: '635e1d61-543b-49ac-90e4-f7d129dc343f',
+        email: 'john.doe@example.com',
+        phone: null,
+        username: 'johnnie',
+        firstName: 'John',
+        lastName: 'Doe'
+    },
+    {
+        id: '635e1d61-543b-49ac-90e4-f7d12asd9dc343f',
+        email: 'josadhn.doe@example.com',
+        phone: null,
+        username: 'johnnasdie',
+        firstName: 'Jasdohn',
+        lastName: 'Dasdoe'
+    }
+]

@@ -1,0 +1,46 @@
+$confirm-button-color: #05ad05;
+
+.card {
+  border: 2px solid #f0f0f0;
+  margin-bottom: 20px !important;
+  &:nth-last-child {
+    margin-bottom: 0 !important;
+  }
+  &-form {
+    //max-width: 288px;
+  }
+  &-title {
+    margin-bottom: 20px;
+  }
+  &-info {
+    margin-bottom: 20px;
+  }
+  &-head {
+    display: flex;
+    justify-content: space-between;
+  }
+  &-comment-field {
+    margin-bottom: 0 !important;
+  }
+  &-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  &-comment {
+    //min-height: 150px;
+    margin-top: 12px !important;
+  }
+}
+
+.button {
+  &-confirm {
+    color: $confirm-button-color !important;
+    border-color: $confirm-button-color !important;
+    &:hover {
+      color: lighten($confirm-button-color, 9%) !important;
+      border-color: lighten($confirm-button-color, 9%) !important;
+    }
+  }
+}
+
+
