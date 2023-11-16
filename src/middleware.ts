@@ -14,11 +14,12 @@ export default withAuth(
         return NextResponse.next();
     },
     {
-        pages: {
-            signIn: '/login',
-            // error: '/error',
-            // signOut: '/login',
-        },
+        // pages: {
+        //     signIn: '/login',
+        //     error: '/login',
+        //     verifyRequest: '/login'
+        //     // signOut: '/login',
+        // },
         callbacks: {
             authorized({token, req}) {
                 const isAuthenticated = Boolean(token?.accessToken)

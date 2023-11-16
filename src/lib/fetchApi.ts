@@ -23,7 +23,10 @@ export async function AuthGetApi<T = any, SINGLE = false>(url: string): Promise<
 
     let res = await fetch(BASE_URL + url, {
         method: 'GET',
-        headers: { Authorization: `Bearer ${session?.user.accessToken}`, },
+        headers: {
+            Authorization: `Bearer ${session?.user.accessToken}`,
+            'Content-Type': 'application/json'
+        },
     });
 
     if (res.status == 401) {
@@ -34,7 +37,10 @@ export async function AuthGetApi<T = any, SINGLE = false>(url: string): Promise<
 
         res = await fetch(BASE_URL + url, {
             method: 'GET',
-            headers: { Authorization: `Bearer ${session?.user.accessToken}`, },
+            headers: {
+                Authorization: `Bearer ${session?.user.accessToken}`,
+                'Content-Type': 'application/json'
+            },
         });
         return await res.json();
     }

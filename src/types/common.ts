@@ -27,6 +27,13 @@ export interface IUserSession extends Pick<IUser, 'firstName' | 'lastName'>{
     jti: string
 }
 
+export interface IJwtPayload {
+    id: string,
+    role: string,
+    iat: number,
+    exp: number
+}
+
 export interface IUserLogin {
     remember: boolean;
     username: string;

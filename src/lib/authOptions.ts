@@ -1,34 +1,31 @@
 import {AuthOptions} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import {EAuthCookie, IJwtPayload, IUserSession} from "@/types/common";
+import {jwtDecode} from "jwt-decode";
+import {encode} from "next-auth/jwt";
 
 const authOptions: AuthOptions = {
-    // Configure one or more authentication providers
     providers: [
         CredentialsProvider({
-            // The name to display on the sign in form (e.g. "Sign in with...")
             name: 'Credentials',
-            // `credentials` is used to generate a form on the sign in page.
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
-            // You can pass any HTML attribute to the <input> tag through the object.
             credentials: {
-                username: { name: 'Username', type: 'text' },
-                password: { name: 'Password', type: 'password' },
-                remember: { name: 'Remember', type: 'checkbox' },
+                username: {name: 'Username', type: 'text'},
+                password: {name: 'Password', type: 'password'},
+                remember: {name: 'Remember', type: 'checkbox'},
             },
             async authorize(credentials, req) {
-                // Add logic here to look up the user from the credentials supplied
                 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+                const rememberMe = credentials?.remember === 'true';
                 console.log('authorize', {BASE_URL, credentials})
 
                 try {
                     const res = await fetch(`${BASE_URL}/auth/admin/login`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', },
+                        headers: {'Content-Type': 'application/json',},
                         body: JSON.stringify({
                             username: credentials?.username,
                             password: credentials?.password,
-                            rememberMe: credentials?.remember === 'true',
+                            rememberMe
                         }),
                     });
 
@@ -36,11 +33,15 @@ const authOptions: AuthOptions = {
                         throw res;
                     }
 
-                    const user = await res.json();
-                    console.log('authorize', { user, res });
+                    const user: IUserSession = await res.json();
+                    console.log('authorize', {user, rememberMe});
+                    const payload = rememberMe
+                        ? jwtDecode<IJwtPayload>(user[EAuthCookie.REFRESH])
+                        : jwtDecode<IJwtPayload>(user[EAuthCookie.ACCESS]);
+                    console.log('authorize', {payload});
 
                     if (user) {
-                        return user;
+                        return {...user, ...payload};
                     } else {
                         return null;
                     }
@@ -53,30 +54,33 @@ const authOptions: AuthOptions = {
             },
         }),
     ],
-    // pages: {
-    //     signIn: "/auth/signIn",
-    // },
-    // pages: { signIn: '/login' },
-    callbacks: {
-        // async signIn({ user, account, profile, email, credentials }) {
-        //     console.log('signIn', {user, account, profile, email, credentials})
-        //     return true
+    jwt: {
+        // decode(params) {
+        //     console.log('decode', params)
+        //     return null
         // },
-        // redirect({url, baseUrl}) {
-        //     console.log('redirect', {url, baseUrl})
-        //     return baseUrl
-        // },
-        async jwt({
-                      token, user, account
-                  }) {
-            // console.log({ account });
+        encode(params) {
+            const currentTime = Math.floor(Date.now() / 1000)
+            const newMaxAge = (params.token as any)?.exp - currentTime
+            params.maxAge = newMaxAge
 
-            return { ...token, ...user };
+            return encode(params)
+        }
+    },
+    pages: {
+        signIn: '/login',
+        verifyRequest: '/login',
+        // error: '/login'
+        // signOut: '/login',
+    },
+    callbacks: {
+        async jwt({token, user, account}) {
+            // console.log('jwt', { token, user, account });
+            return {...token, ...user};
         },
-        async session({
-                          session, token, user
-                      }) {
-            session.user = token as never;
+        async session({session, token, user}) {
+            // console.log('session', { session, token, user });
+            session.user = token;
 
             return session;
         },
