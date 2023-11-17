@@ -27,7 +27,7 @@ const {
 // eslint-disable-next-line react/display-name
 const Label = memo(({item}: { item: ISideBarMenuOptions }) => {
     return (
-        <Link href={item.path}>
+        <Link prefetch={false} href={item.path}>
             {item.name}
         </Link>
     );

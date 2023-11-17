@@ -1,5 +1,5 @@
 "use client"
-import {FC, useCallback, useRef, useState} from 'react';
+import {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {LockOutlined, UserOutlined} from '@ant-design/icons';
 import {
     Form, Input, Button, Checkbox, type FormInstance, Alert
@@ -15,7 +15,11 @@ import {useRouter} from "next/navigation";
 const LoginForm: FC = () => {
     const formRef = useRef<FormInstance | null>(null);
     const [loginError, setLoginError] = useState('')
-    const {replace} = useRouter()
+    const router = useRouter()
+
+    useEffect(() => {
+        router.prefetch(ProtectedPages.main)
+    }, [router])
 
     const onFinish = useCallback(async (value: IUserLogin) => {
         try {
@@ -29,7 +33,7 @@ const LoginForm: FC = () => {
             console.log('onFinish', res);
 
             if(res?.ok) {
-                replace(ProtectedPages.main)
+                router.replace(ProtectedPages.main)
             } else {
                 if (res?.status === 401) {
                     setLoginError('Wrong username or password!')

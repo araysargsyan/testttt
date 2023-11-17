@@ -1,28 +1,32 @@
 import {withAuth} from 'next-auth/middleware';
 import {type NextRequest, NextResponse} from 'next/server';
+import {ProtectedPages} from "@/constants";
 
 
 export default withAuth(
     function middleware(req: NextRequest) {
-        // console.log('middleware: pathname', req.nextUrl.pathname);
-        // console.log('middleware: auth cookie', req.cookies.get('next-auth.session-token'));
+        console.log('middleware: pathname', req.nextUrl.pathname);
+        console.log('middleware: auth cookie', req.cookies.get('next-auth.session-token'));
+        console.log('middleware: user', req.user);
 
-        // if (req.nextUrl.pathname === '/login' && req.cookies.get('next-auth.session-token')) {
+        // //! FOR EXAMPLE
+        // if (
+        //     req.cookies.get('next-auth.session-token')
+        //     && req.user.role === 'superAdmin'
+        //     && req.nextUrl.pathname === ProtectedPages.transaction
+        // ) {
         //     return NextResponse.redirect(new URL(ProtectedPages.main, req.url));
         // }
 
         return NextResponse.next();
     },
     {
-        // pages: {
-        //     signIn: '/login',
-        //     error: '/login',
-        //     verifyRequest: '/login'
-        //     // signOut: '/login',
-        // },
         callbacks: {
             authorized({token, req}) {
                 const isAuthenticated = Boolean(token?.accessToken)
+                if (token) {
+                    req.user = token
+                }
                 console.log('authorized', {isAuthenticated, token});
                 return isAuthenticated;
             },
@@ -30,4 +34,13 @@ export default withAuth(
     }
 );
 
-export const config = {matcher: ['/', '/users', '/admins', '/order-process', '/transaction']};
+
+export const config = {
+    matcher: [
+        '/',
+        '/users',
+        '/admins',
+        '/order-process/:processId*',
+        '/transactions'
+    ]
+};

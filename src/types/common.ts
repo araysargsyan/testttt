@@ -19,19 +19,18 @@ export interface IUser {
     blockedAt: Date | null;
 }
 
-export interface IUserSession extends Pick<IUser, 'firstName' | 'lastName'>{
-    [EAuthCookie.ACCESS]: string;
-    [EAuthCookie.REFRESH]: string;
-    iat: number,
-    exp: number,
-    jti: string
+export interface IJwtPayload {
+    sub: string;
+    id: string;
+    role: 'admin' | 'superAdmin';
+    iat: number;
+    exp: number;
+    jti: string;
 }
 
-export interface IJwtPayload {
-    id: string,
-    role: string,
-    iat: number,
-    exp: number
+export interface IUserSession extends Pick<IUser, 'firstName' | 'lastName'>, IJwtPayload {
+    [EAuthCookie.ACCESS]: string;
+    [EAuthCookie.REFRESH]: string;
 }
 
 export interface IUserLogin {
