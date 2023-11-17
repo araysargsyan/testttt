@@ -3,13 +3,13 @@ import {IUserSession} from "@/types/common";
 
 declare module 'next/server' {
     interface NextRequest extends NR {
-        user: IUserSession
+        user?: IUserSession
     }
 }
 
 declare module 'next-auth' {
     interface Session {
-        user?: IUserSession;
+        user: IUserSession;
     }
 
     // type Profile = any
