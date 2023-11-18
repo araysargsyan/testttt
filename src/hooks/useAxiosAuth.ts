@@ -1,19 +1,17 @@
-import {signIn, signOut, useSession} from 'next-auth/react';
-import {useCallback} from 'react';
+import {
+    signIn, signOut, useSession
+} from 'next-auth/react';
+import { useCallback } from 'react';
 
-import axios, {axiosAuth} from '@/lib/axios';
+import axios, { axiosAuth } from '@/lib/axios';
 
 
 const useAxiosAuth = () => {
-    const {data: session} = useSession();
+    const { data: session } = useSession();
 
     const refreshToken = useCallback(async () => {
         try {
-            const res = await axios.get('/auth/refresh-access', {
-                headers: {
-                    Authorization: `Bearer ${session?.user.refreshToken}`
-                }
-            });
+            const res = await axios.get('/auth/refresh-access', { headers: { Authorization: `Bearer ${session?.user.refreshToken}` } });
             console.log('useAxiosAuth: refreshToken', res);
 
             if (session) {
@@ -24,9 +22,10 @@ const useAxiosAuth = () => {
             }
         } catch (e) {
             console.log('useAxiosAuth: refreshToken', e);
-            signOut({callbackUrl: '/login'});
+            signOut({ callbackUrl: '/login' });
         }
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     axiosAuth.interceptors.request.use(
         (config) => {

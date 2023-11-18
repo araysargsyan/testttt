@@ -1,9 +1,9 @@
-const {join} = require("path");
+const { join } = require('path');
+
 
 const nextConfig = {
-  sassOptions: {
-    includePaths: [join(__dirname, 'styles')],
-  },
-}
+    reactStrictMode: false,
+    sassOptions: { includePaths: [ join(__dirname, 'styles') ], },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

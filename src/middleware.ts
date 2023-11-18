@@ -1,6 +1,5 @@
-import {withAuth} from 'next-auth/middleware';
-import {type NextRequest, NextResponse} from 'next/server';
-import {ProtectedPages} from "@/constants";
+import { withAuth } from 'next-auth/middleware';
+import { type NextRequest, NextResponse } from 'next/server';
 
 
 export default withAuth(
@@ -22,18 +21,17 @@ export default withAuth(
     },
     {
         callbacks: {
-            authorized({token, req}) {
-                const isAuthenticated = Boolean(token?.accessToken)
+            authorized({ token, req }) {
+                const isAuthenticated = Boolean(token?.accessToken);
                 if (token) {
-                    req.user = token
+                    req.user = token;
                 }
-                console.log('authorized', {isAuthenticated, token});
+                console.log('authorized', { isAuthenticated, token });
                 return isAuthenticated;
             },
         },
     }
 );
-
 
 export const config = {
     matcher: [

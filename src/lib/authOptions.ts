@@ -1,27 +1,33 @@
-import {AuthOptions} from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import {EAuthCookie, IJwtPayload, IUserSession} from "@/types/common";
-import {jwtDecode} from "jwt-decode";
-import {encode} from "next-auth/jwt";
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { jwtDecode } from 'jwt-decode';
+import { encode } from 'next-auth/jwt';
+import { type AuthOptions } from 'next-auth';
+
+import {
+    EAuthCookie,
+    type IJwtPayload,
+    type IUserSession
+} from '@/types/common';
+
 
 const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
             name: 'Credentials',
             credentials: {
-                username: {name: 'Username', type: 'text'},
-                password: {name: 'Password', type: 'password'},
-                remember: {name: 'Remember', type: 'checkbox'},
+                username: { name: 'Username', type: 'text' },
+                password: { name: 'Password', type: 'password' },
+                remember: { name: 'Remember', type: 'checkbox' },
             },
             async authorize(credentials, req) {
                 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
                 const rememberMe = credentials?.remember === 'true';
-                console.log('authorize', {BASE_URL, credentials})
+                console.log('authorize', { BASE_URL, credentials });
 
                 try {
                     const res = await fetch(`${BASE_URL}/auth/admin/login`, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json',},
+                        headers: { 'Content-Type': 'application/json', },
                         body: JSON.stringify({
                             username: credentials?.username,
                             password: credentials?.password,
@@ -34,14 +40,14 @@ const authOptions: AuthOptions = {
                     }
 
                     const user: IUserSession = await res.json();
-                    console.log('authorize', {user, rememberMe});
+                    console.log('authorize', { user, rememberMe });
                     const payload = rememberMe
                         ? jwtDecode<IJwtPayload>(user[EAuthCookie.REFRESH])
                         : jwtDecode<IJwtPayload>(user[EAuthCookie.ACCESS]);
-                    console.log('authorize', {payload});
+                    console.log('authorize', { payload });
 
                     if (user) {
-                        return {...user, ...payload};
+                        return { ...user, ...payload };
                     } else {
                         return null;
                     }
@@ -60,11 +66,11 @@ const authOptions: AuthOptions = {
         //     return null
         // },
         encode(params) {
-            const currentTime = Math.floor(Date.now() / 1000)
-            const newMaxAge = (params.token as any)?.exp - currentTime
-            params.maxAge = newMaxAge
+            const currentTime = Math.floor(Date.now() / 1000);
+            const newMaxAge = (params.token as any)?.exp - currentTime;
+            params.maxAge = newMaxAge;
 
-            return encode(params)
+            return encode(params);
         }
     },
     pages: {
@@ -74,11 +80,15 @@ const authOptions: AuthOptions = {
         // signOut: '/login',
     },
     callbacks: {
-        async jwt({token, user, account}) {
+        async jwt({
+            token, user, account
+        }) {
             // console.log('jwt', { token, user, account });
-            return {...token, ...user};
+            return { ...token, ...user };
         },
-        async session({session, token, user}) {
+        async session({
+            session, token, user 
+        }) {
             // console.log('session', { session, token, user });
             session.user = token;
 
@@ -87,4 +97,4 @@ const authOptions: AuthOptions = {
     },
 };
 
-export default authOptions
+export default authOptions;

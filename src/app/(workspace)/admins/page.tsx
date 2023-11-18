@@ -1,22 +1,29 @@
-import {Suspense} from "react";
-import Spinner from "@/components/Spiner";
-import TableContainer from "@/components/Table";
-import {Metadata, NextPage} from "next";
-import {IPageProps} from "@/types/core";
+import React, { Suspense } from 'react';
+import { type Metadata, type NextPage } from 'next';
+
+import Spinner from '@/components/Spiner';
+import TableContainer from '@/components/Table';
+import { type IPageProps } from '@/types/core';
+import { AdminsProvider } from '@/store/admins';
+import styles from '@/components/Table/Table.module.scss';
+import AddButton from '@/components/Buttons/AddButton';
+import PageHeader from '@/components/PageHeader/PageHeader';
+
 
 const AdminsPage: NextPage<IPageProps> = () => {
     return (
-        <>
-            <h1>Admins</h1>
-            <Suspense fallback={<Spinner/>}>
-                <TableContainer dataUrl={'/user/admin'}/>
+        <AdminsProvider>
+            <PageHeader title={ 'Admins' } />
+            <Suspense fallback={ <Spinner /> }>
+                <TableContainer
+                    dataUrl={ '/user/admin' }
+                    provider={ 'admins' }
+                />
             </Suspense>
-        </>
-    )
-}
+        </AdminsProvider>
+    );
+};
 
 export default AdminsPage;
 
-export const metadata: Metadata = {
-    title: 'Admins',
-}
+export const metadata: Metadata = { title: 'Admins', };

@@ -1,9 +1,11 @@
-import {NextRequest as NR} from "next/server";
-import {IUserSession} from "@/types/common";
+import { NextRequest as NR } from 'next/server';
+
+import { IUserSession } from '@/types/common';
+
 
 declare module 'next/server' {
     interface NextRequest extends NR {
-        user?: IUserSession
+        user?: IUserSession;
     }
 }
 
@@ -16,7 +18,7 @@ declare module 'next-auth' {
     // type Account = any
 
     //! returned by authorize
-    type User = IUserSession
+    type User = IUserSession;
 }
 
 declare module 'next-auth/jwt' {

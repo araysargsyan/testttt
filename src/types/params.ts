@@ -1,3 +1,3 @@
 export interface IOrderProcessParams {
-    processId: string
+    processId: string;
 }

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, {
     createElement,
     useState,
@@ -8,34 +8,43 @@ import React, {
     type PropsWithChildren,
 } from 'react';
 import Link from 'next/link';
-import {Button, Layout, Menu} from 'antd';
+import {
+    Button, Layout, Menu
+} from 'antd';
 import {
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
 } from '@ant-design/icons';
+import { signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
-import {sideBarMenuOptions, type ISideBarMenuOptions} from '@/constants';
-import {signOut} from "next-auth/react";
-import {usePathname} from "next/navigation";
+import { sideBarMenuOptions, type ISideBarMenuOptions } from '@/constants';
+
+
 import styles from './SidebarMenu.module.scss';
+
 
 const {
     Header, Sider, Content
 } = Layout;
 
 // eslint-disable-next-line react/display-name
-const Label = memo(({item}: { item: ISideBarMenuOptions }) => {
+const Label = memo(({ item }: { item: ISideBarMenuOptions }) => {
     return (
-        <Link prefetch={false} href={item.path}>
-            {item.name}
+        <Link
+            prefetch={ false }
+            href={ item.path }
+        >
+            { item.name }
         </Link>
     );
 });
 
-const SidebarMenu: FC<PropsWithChildren> = ({children}) => {
+const SidebarMenu: FC<PropsWithChildren> = ({ children }) => {
     const pathname = usePathname() || '/';
-    const [collapsed, setCollapsed] = useState(false);
+    const [ collapsed, setCollapsed ] = useState(false);
 
     const generateSidebarMenuItems = useCallback((options: Array<ISideBarMenuOptions>) => {
         return options.map((option) => ({
@@ -43,8 +52,8 @@ const SidebarMenu: FC<PropsWithChildren> = ({children}) => {
             icon: option.icon,
             label: (
                 <Label
-                    key={option.path}
-                    item={option}
+                    key={ option.path }
+                    item={ option }
                 />
             ),
         }));
@@ -53,24 +62,38 @@ const SidebarMenu: FC<PropsWithChildren> = ({children}) => {
     return (
         <Layout className="layout">
             <Sider
-                trigger={null}
+                trigger={ null }
                 theme="light"
                 collapsible
-                collapsed={collapsed}
+                collapsed={ collapsed }
             >
-                <div className={styles.sidebar}>
-                    <div className={styles['menu-wrapper']}>
-                        <div className={'logoMy'}>
+                <div className={ styles.sidebar }>
+                    <div className={ styles['menu-wrapper'] }>
+                        <div className={ 'logoMy' }>
                             {
                                 collapsed ? (
-                                    <img
+                                    <Image
+                                        priority={ true }
+                                        style={{
+                                            width: 'auto',
+                                            height: 'auto',
+                                        }}
+                                        width={ 0 }
+                                        height={ 0 }
                                         src="/logo.svg"
                                         alt="Logo"
                                     />
                                 ) : (
-                                    <img
+                                    <Image
+                                        priority={ true }
+                                        style={{
+                                            width: 'auto',
+                                            height: 'auto',
+                                        }}
+                                        width={ 0 }
+                                        height={ 0 }
                                         src="/layer.svg"
-                                        alt="Logo"
+                                        alt="Layer"
                                     />
                                 )
                             }
@@ -78,34 +101,37 @@ const SidebarMenu: FC<PropsWithChildren> = ({children}) => {
                         <Menu
                             theme="light"
                             mode="inline"
-                            defaultSelectedKeys={[pathname]}
-                            items={generateSidebarMenuItems(sideBarMenuOptions)}
+                            defaultSelectedKeys={ [ pathname ] }
+                            items={ generateSidebarMenuItems(sideBarMenuOptions) }
                         />
                     </div>
                     <div
-                        className={styles.logout}
-                        onClick={() => signOut({callbackUrl: '/login'})}
+                        className={ styles.logout }
+                        onClick={ () => signOut({ callbackUrl: '/login' }) }
                     >
-                        {collapsed ? <LogoutOutlined/> :
-                            <Button style={{maxWidth: 100}}>
+                        { collapsed ? <LogoutOutlined /> : (
+                            <Button style={{ maxWidth: 100 }}>
                                 Sign Out
-                            </Button>}
+                            </Button>
+                        ) }
                     </div>
                 </div>
             </Sider>
             <Layout className="site-layout">
-                <div style={{display: 'flex', width: '100%'}}>
+                <div style={{ display: 'flex', width: '100%' }}>
                     <Header
                         className="site-layout-background"
-                        style={{padding: 0, display: 'flex', width: '100%'}}
+                        style={{
+                            padding: 0, display: 'flex', width: '100%'
+                        }}
 
                     >
 
-                        {createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                        { createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
                             className: 'trigger',
                             onClick: () => setCollapsed(!collapsed),
 
-                        })}
+                        }) }
                     </Header>
                 </div>
                 <Content
@@ -116,7 +142,7 @@ const SidebarMenu: FC<PropsWithChildren> = ({children}) => {
                         height: '720px',
                     }}
                 >
-                    {children}
+                    { children }
                 </Content>
             </Layout>
         </Layout>

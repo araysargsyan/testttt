@@ -1,11 +1,11 @@
-"use client"
-import {FC, useState} from 'react';
+'use client';
+import { FC, useState } from 'react';
 import { Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import Search from "antd/lib/input/Search";
+import Search from 'antd/lib/input/Search';
 
 
-const SearchBar: FC = () => {
+const SearchBar: FC<any> = () => {
     const [ searchValue, setSearchValue ] = useState<string>('');
 
     const handleSearch = (value: string) => {
@@ -17,7 +17,7 @@ const SearchBar: FC = () => {
         <div>
             <Space
                 direction="vertical"
-                style={{ width: '100%',}}
+                style={{ width: '100%', }}
             >
                 <Search
                     placeholder="Search..."

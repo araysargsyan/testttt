@@ -1,20 +1,21 @@
-import Spinner from "@/components/Spiner";
-import {Suspense} from "react";
-import TableContainer from "@/components/Table";
-import {IPageProps} from "@/types/core";
-import {Metadata, NextPage} from "next";
-import {OrderProcessProvider} from "@/store/orderProcess";
+import { Suspense } from 'react';
+import { type Metadata, type NextPage } from 'next';
 
-const OrderProcessListPage: NextPage<IPageProps> = (props) => {
+import Spinner from '@/components/Spiner';
+import TableContainer from '@/components/Table';
+import { type IPageProps } from '@/types/core';
+
+
+const OrderProcessListPage: NextPage<IPageProps> = () => {
 
     return (
         <>
             <h1>Order Process List</h1>
-            <Suspense fallback={<Spinner/>}>
+            <Suspense fallback={ <Spinner /> }>
                 <TableContainer
-                    isRowClickable={true}
-                    dataUrl={'/order-process'}
-                    ignoreColumns={['users']}
+                    isRowClickable={ true }
+                    dataUrl={ '/order-process' }
+                    ignoreColumns={ [ 'users' ] }
                 />
             </Suspense>
         </>
@@ -23,9 +24,7 @@ const OrderProcessListPage: NextPage<IPageProps> = (props) => {
 
 export default OrderProcessListPage;
 
-export const metadata: Metadata = {
-    title: 'Order Process List',
-}
+export const metadata: Metadata = { title: 'Order Process List', };
 
 
 

@@ -5,7 +5,7 @@ import {
     TeamOutlined,
     DashboardOutlined,
 } from '@ant-design/icons';
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 
 export const ProtectedPages = {
@@ -13,15 +13,15 @@ export const ProtectedPages = {
     users: '/users',
     admins: '/admins',
     orderProcess: '/order-process',
-    transaction: '/transactions',
+    transactions: '/transactions'
 } as const;
-
 
 export interface ISideBarMenuOptions {
     path: string;
     name: string;
-    icon: ReactNode
+    icon: ReactNode;
 }
+
 export const sideBarMenuOptions: Array<ISideBarMenuOptions> = [
     {
         name: 'Dashboard',
@@ -45,7 +45,7 @@ export const sideBarMenuOptions: Array<ISideBarMenuOptions> = [
     },
     {
         name: 'Transactions',
-        path: ProtectedPages.transaction,
+        path: ProtectedPages.transactions,
         icon: <TransactionOutlined />
     }
 ];
@@ -66,4 +66,4 @@ export const fakeUsers = [
         firstName: 'Jasdohn',
         lastName: 'Dasdoe'
     }
-]
+];

@@ -2,8 +2,3 @@ export interface IPageProps<P = Record<string, string>, SP = Record<string, stri
     params: P;
     searchParams: SP;
 }
-
-export interface IAction<T extends string = string> {
-    type: T;
-    payload?: any;
-}

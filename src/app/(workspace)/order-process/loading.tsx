@@ -1,5 +1,6 @@
-import Spinner from "@/components/Spiner";
+import Spinner from '@/components/Spiner';
+
 
 export default function Loading() {
-    return <Spinner />
+    return <Spinner />;
 }

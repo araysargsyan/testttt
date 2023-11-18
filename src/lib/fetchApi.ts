@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 
-import {IResponsePayload} from "@/types/common";
+import { IResponsePayload } from '@/types/common';
+
 import authOptions from './authOptions';
 
 

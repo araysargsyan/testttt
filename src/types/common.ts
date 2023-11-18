@@ -47,11 +47,11 @@ export interface IResponsePayload<T> {
 
 interface ITransaction {
     id?: string;
-    updatedAt?:  Date | string | null;
-    createdAt?:  Date | string | null;
-    updatedBy?:  string | null;
+    updatedAt?: Date | string | null;
+    createdAt?: Date | string | null;
+    updatedBy?: string | null;
     createdBy?: string | null;
-    deletedAt?:  Date | string | null;
+    deletedAt?: Date | string | null;
 
     status: 'pending' | 'completed' | 'failed';
     type: 'init' | 'retry' | 'refund' | 'cancel';
@@ -67,24 +67,13 @@ const OrderProcessStatus = {
     pending: 'pending',
     inProcess: 'inProcess',
     done: 'done',
-} as const
+} as const;
 
-const OrderProcessStepsStatus = {...OrderProcessStatus, blocked: 'blocked'}
+const OrderProcessStepsStatus = { ...OrderProcessStatus, blocked: 'blocked' };
 
-export type TOrderProcessStepsStatus = keyof typeof OrderProcessStepsStatus
+export type TOrderProcessStepsStatus = keyof typeof OrderProcessStepsStatus;
 
-
-// export interface IInputsData {
-//     startDate?: string/*Date*/;
-//     dateAndTime?: string/*Date*/;
-//     phoneNumber?: number;
-//     deliveryAddress?: string;
-//     "TIN number"?: number | null;
-//     "Date of registration"?: string/*Date*/ | null;
-//     "Government registration number"?: number | null;
-// }
-
-export type IInputsData = Record<string, { type: 'text' | 'number' | 'date', value: any}>
+export type IInputsData = Record<string, { type: 'text' | 'number' | 'date'; value: any }>;
 
 
 export interface IStaticData {
@@ -92,21 +81,23 @@ export interface IStaticData {
     title: string;
     startDate?: string/*Date*/;
 }
+
 export interface IProcessSteps {
     id: string;
     status: keyof typeof OrderProcessStepsStatus;
     step: number;
-    inputsData: IInputsData,
-    staticData: IStaticData,
+    inputsData: IInputsData;
+    staticData: IStaticData;
     comment: string | null;
-    documents: any[]
+    documents: any[];
 }
+
 export interface IOrderProcess {
     id: string;
     createdAt: Date | null;
     updatedAt: Date | null;
     deletedAt: Date | null;
-    status: keyof typeof OrderProcessStatus,
+    status: keyof typeof OrderProcessStatus;
     name: string;
     processSteps: IProcessSteps[];
     users: any[];
@@ -114,7 +105,7 @@ export interface IOrderProcess {
         id: string;
         firstName: string;
         lastName: string;
-    },
+    };
     updatedBy: Date | null;
 }
 

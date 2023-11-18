@@ -1,16 +1,16 @@
-import {IPageProps} from "@/types/core";
-import {Metadata, NextPage} from "next";
+import { type Metadata, type NextPage } from 'next';
 
-const Home: NextPage<IPageProps> = (props) => {
+import { type IPageProps } from '@/types/core';
+
+
+const Home: NextPage<IPageProps> = () => {
     return (
         <section>
             dashboard
         </section>
-    )
-}
+    );
+};
 
 export default Home;
 
-export const metadata: Metadata = {
-    title: 'Dashboard',
-}
+export const metadata: Metadata = { title: 'Dashboard', };

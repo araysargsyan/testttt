@@ -1,16 +1,18 @@
-import SidebarMenu from "@/components/SidebarMenu/SidebarMenu";
-import {ReactNode} from "react";
+import { type ReactNode } from 'react';
 
-const WorkspaceLayout = ({children}: {
-    children: ReactNode
+import SidebarMenu from '@/components/SidebarMenu/SidebarMenu';
+
+
+const WorkspaceLayout = ({ children }: {
+    children: ReactNode;
 }) => {
     return (
         <section>
             <SidebarMenu>
-                {children}
+                { children }
             </SidebarMenu>
         </section>
-    )
+    );
 };
 
 export default WorkspaceLayout;

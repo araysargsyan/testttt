@@ -1,15 +1,21 @@
-"use client"
+'use client';
 
-import React, {type FC, useState} from 'react';
-import {Button} from 'antd';
-import {type TableRowSelection} from 'antd/es/table/interface';
-import {useRouter} from "next/navigation";
-import {Table as TableComponent} from 'antd/lib';
+import React, {
+    type FC, memo, useState
+} from 'react';
+import { Button } from 'antd';
+import { type TableRowSelection } from 'antd/es/table/interface';
+import { useRouter } from 'next/navigation';
+import { Table as TableComponent } from 'antd/lib';
+
+import upperCaseFirstLetter from '@/lib/util/upperCaseFirstLetter';
+import { TProviders, useProviderData } from '@/store';
+
 import styles from './Table.module.scss';
-import upperCaseFirstLetter from "@/lib/util/upperCaseFirstLetter";
 
 
 interface DataType {
+    id: string;
     key: number;
     name: string;
     age: number;
@@ -17,64 +23,57 @@ interface DataType {
     description: string;
 }
 
-export const Table: FC<{
-    data: any;
+const Table: FC<{
+    data?: any;
+    provider?: TProviders;
     dataUrl: string;
     columns: any[];
     isRowClickable: boolean;
 }> = ({
     data,
+    provider,
     dataUrl,
     columns,
-    isRowClickable
+    isRowClickable,
 }) => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editRecord, setEditRecord] = useState<DataType | null>(null);
-    const {push} = useRouter()
-    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(newSelectedRowKeys);
+    const tableData = useProviderData(data, provider);
+    const [ selectedRowKeys, setSelectedRowKeys ] = useState<React.Key[]>([]);
+    const [ sortedInfo, setSortedInfo ] = useState<{
+        columnKey?: string;
+        order?: 'ascend' | 'descend';
+    }>({});
+    const { push } = useRouter();
+
+    const handleChange = (pagination: any, filters: any, sorter: any) => {
+        // setSortedInfo({
+            // columnKey: sorter.columnKey,
+            // order: sorter.order,
+        // });
+
+        const columnDataIndex = sorter.columnKey || (sorter.column && sorter.column.dataIndex);
+
+        if (sorter.order === 'ascend') {
+            console.log('Sorting Order: Ascending');
+        } else if (sorter.order === 'descend') {
+            console.log('Sorting Order: Descending');
+        } else {
+            console.log('Sorting Order: Unsorted');
+        }
+
+        console.log('Column Index:', columnDataIndex);
     };
-
-    const bordered = false;
-    const loading = false;
-    const size = 'middle';
-    const showTitle = false;
-    const showHeader = true;
-    const hasData = true;
-    const top = 'none';
-    const bottom = 'bottomRight';
-
 
     const rowSelection: TableRowSelection<DataType> = {
         selectedRowKeys,
-        onChange: onSelectChange,
+        onChange: (newSelectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+            setSelectedRowKeys(newSelectedRowKeys);
+            console.log('Selected rows:', selectedRows);
+        },
     };
 
-    const handleEdit = (record: DataType) => {
-        setEditRecord(record);
-        setIsModalVisible(true);
-    };
-
-    const handleDelete = (record: DataType) => {
-        console.log('Delete:', record);
-
-    };
-
-
-    const onFinish = (values: any) => {
-        const updatedData = data.map((item: DataType) => {
-            if (item.key === editRecord?.key) {
-                return {...item, ...values};
-            }
-            return item;
-        });
-
-        setIsModalVisible(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
+    const handleRowClick = (record: DataType) => {
+        console.log('Row clicked:', record);
+        push(`${dataUrl}/${record.id}`);
     };
 
     const columnsWithActions: any = [
@@ -88,39 +87,58 @@ export const Table: FC<{
             dataIndex: 'actions',
             key: 'actions',
             render: (_: any, record: DataType) => (
-                <div style={{display: 'flex', gap: '10px'}}>
+                <div style={{ display: 'flex', gap: '10px' }}>
                     <Button
                         type="primary"
                         danger
-                        onClick={() => handleDelete(record)}
+                        // onClick={() => handleDelete(record)}
                     >
                         Delete
                     </Button>
-                    {!isRowClickable ?
+                    { !isRowClickable ? (
                         <Button
                             danger
-                            onClick={() => handleEdit(record)}
+                            // onClick={() => handleEdit(record)}
                         >
                             Edit
-                        </Button> : ''}
+                        </Button>
+                    ) : '' }
                 </div>
             ),
         },
     ];
 
-    return <TableComponent
-        rowKey={'id'}
-        rowClassName={styles['table-row']}
-        rowSelection={rowSelection}
-        pagination={{position: [top, bottom]}}
-        columns={columnsWithActions}
-        dataSource={hasData ? data : []}
-        onRow={(data: any, index) => ({
-            ...isRowClickable && {
-                onClick: (e) => {
-                    push(`${dataUrl}/${data.id}`)
-                },
-            }
-        })}
-    />
+    return (
+        <>
+            <TableComponent
+                rowKey={ 'id' }
+                rowClassName={ isRowClickable ? styles['table-row'] : '' }
+                rowSelection={ rowSelection }
+                pagination={{ position: [ 'none', 'bottomRight' ] }}
+                columns={ columnsWithActions.map((column: any) => ({
+                    ...column,
+                    sorter: (a: any, b: any) => {
+                        if (column.dataIndex === 'actions') {
+                            return 0;
+                        }
+                        const valueA = a[column.dataIndex];
+                        const valueB = b[column.dataIndex];
+
+                        if (typeof valueA === 'string') {
+                            return valueA.localeCompare(valueB);
+                        } else if (typeof valueA === 'number') {
+                            return valueA - valueB;
+                        } else {
+                            return 0;
+                        }
+                    },
+                    sortOrder: sortedInfo.columnKey === column.dataIndex ? sortedInfo.order : undefined,
+                })) }
+                dataSource={ tableData }
+                onRow={ (rowData: any) => ({ ...isRowClickable && { onClick: () => handleRowClick(rowData), }, }) }
+            />
+        </>
+    );
 };
+
+export default memo(Table);

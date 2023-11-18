@@ -1,0 +1,195 @@
+module.exports = {
+    env: {
+        browser: true,
+        es2021: true,
+        jest: true
+    },
+    extends: [
+        'next',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+        // 'next/core-web-vitals',
+        // 'plugin:i18next/recommended',
+    ],
+    settings: {
+        'import/resolver': {
+            typescript: true,
+            node: true
+        }
+    },
+    parser: '@typescript-eslint/parser',
+    parserOptions: {
+        ecmaFeatures: { jsx: true, },
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+    },
+    plugins: [
+        'react',
+        'react-hooks',
+        '@typescript-eslint',
+        'import',
+        // 'i18next',
+    ],
+    rules: {
+        'semi': 'error',
+        'quotes': [ 'error', 'single', { 'avoidEscape': true } ],
+        'object-curly-spacing': [ 'error', 'always' ],
+        'array-bracket-spacing': [ 'error', 'always' ],
+        'space-in-parens': [ 'error', 'never' ],
+        'jsx-quotes': [ 'error', 'prefer-double' ],
+        'indent': [ 'error', 4, {
+            'ignoreComments': true,
+            'offsetTernaryExpressions': true,
+            'flatTernaryExpressions': false,
+            'ImportDeclaration': 'first',
+            'ObjectExpression': 1,
+            'ArrayExpression': 1,
+            'CallExpression': { 'arguments': 1 },
+            'MemberExpression': 1,
+            'outerIIFEBody': 'off',
+            'VariableDeclarator': 'first',
+            'SwitchCase': 1
+            //"FunctionDeclaration": {"parameters": "first"}
+        } ],
+        'space-before-blocks': [ 'error', {
+            'functions': 'always',
+            'keywords': 'always',
+            'classes': 'always'
+        } ],
+        'keyword-spacing': [ 'error', {
+            'before': true,
+            'after': true
+        } ],
+        'comma-spacing': [ 'error', {
+            'before': false,
+            'after': true
+        } ],
+        'func-call-spacing': [ 'error', 'never' ],
+        'space-before-function-paren': [ 'error', {
+            'anonymous': 'never',
+            'named': 'never',
+            'asyncArrow': 'always'
+        } ],
+        'brace-style': 'error',
+        'object-curly-newline': [ 'error', {
+            multiline: true,
+            minProperties: 3
+        } ],
+        //! react
+        'react/jsx-curly-spacing': [
+            'error',
+            {
+                'when': 'always',
+                'children': true,
+                'spacing': { 'objectLiterals': 'never' }
+            }
+        ],
+        'react/jsx-curly-newline': [ 'error', {
+            'multiline': 'consistent',
+            'singleline': 'forbid'
+        } ],
+        'react/jsx-equals-spacing': [ 'error', 'never' ],
+        'react/react-in-jsx-scope': 'off',
+        'react/jsx-uses-react': 'off',
+        'react/prop-types': 'off',
+        'react/jsx-no-comment-textnodes': 'off',
+        'react/no-children-prop': 'off',
+        'react/jsx-max-props-per-line': 'error',
+        'react/jsx-indent': [ 'error', 4, {
+            'checkAttributes': true,
+            'indentLogicalExpressions': true
+        } ],
+        'react/jsx-indent-props': [ 'error', 4 ],
+        'react/jsx-key': 'error',
+        'react/jsx-first-prop-new-line': 'error',
+        'react/jsx-closing-tag-location': 'error',
+        'react/jsx-wrap-multilines': [
+            'error',
+            {
+                'declaration': 'parens-new-line',
+                'assignment': 'parens-new-line',
+                'return': 'parens-new-line',
+                'arrow': 'parens-new-line',
+                'condition': 'parens-new-line',
+                'logical': 'parens-new-line',
+                'prop': 'parens-new-line'
+            }
+        ],
+        'react/jsx-child-element-spacing': 'error',
+        'react/jsx-closing-bracket-location': [ 'error', {
+            'selfClosing': 'tag-aligned',
+            'nonEmpty': 'tag-aligned'
+        } ],
+        'react/jsx-props-no-multi-spaces': 'error',
+        'react/jsx-tag-spacing': [
+            'error',
+            {
+                'closingSlash': 'never',
+                'beforeSelfClosing': 'always',
+                'afterOpening': 'never',
+                'beforeClosing': 'never'
+            }
+        ],
+        //! @typescript-eslint
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/ban-ts-comment': 'warn',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': [ 'warn', {
+            vars: 'all',
+            args: 'after-used',
+            ignoreRestSiblings: false,
+            argsIgnorePattern: '^_$',
+            //varsIgnorePattern: '^_$'
+        } ],
+        '@typescript-eslint/prefer-as-const': 'off',
+        '@typescript-eslint/ban-types': 'error',
+        '@typescript-eslint/semi': 'error',
+        '@typescript-eslint/member-delimiter-style': 'error',
+        // '@typescript-eslint/consistent-type-imports': [ 'error', {
+        //     fixStyle: 'inline-type-imports',
+        //     prefer: 'type-imports'
+        // } ],
+        //! import
+        'import/order': [
+            'error',
+            {
+                groups: [
+                    [ 'builtin', 'external' ],
+                    'internal',
+                    [ 'parent', 'sibling', 'index' ]
+                ],
+                'newlines-between': 'always',
+            },
+        ],
+        'import/consistent-type-specifier-style': [ 'error', 'prefer-inline' ],
+        'import/no-duplicates': [ 'error', { 'prefer-inline': true } ],
+        'import/newline-after-import': [ 'error', {
+            'count': 2,
+            'considerComments': false
+        } ],
+        //! i18next
+        // 'i18next/no-literal-string': [ 'warn', {
+        //   validateTemplate: true, //Indicate whether to validate template strings or not. Default false
+        //   markupOnly: false //If markupOnly option turn on, only JSX text and strings used as JSX attributes will be validated.
+        // } ],
+        //! react-hooks
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
+    },
+    globals: {
+        __IS_DEV__: true,
+        __API__: true,
+        __PROJECT__: true,
+    },
+    settings: { 'react': { version: '18', } },
+    overrides: [
+        {
+            files: [ 'next.config.js' ],
+            rules: { '@typescript-eslint/no-var-requires': 'off' },
+        }
+        // {
+        //     files: [ '**/*.test.{ts,tsx}' ],
+        //     rules: { 'i18next/no-literal-string': 'off' },
+        // }
+    ],
+};
