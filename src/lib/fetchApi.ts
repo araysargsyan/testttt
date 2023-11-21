@@ -19,15 +19,16 @@ async function refreshToken(refreshToken: string) {
     return data.accessToken;
 }
 
-export async function AuthGetApi<T = any, SINGLE = false>(url: string): Promise<SINGLE extends false ? IResponsePayload<T> : T> {
+export async function AuthGetApi<T = any, SINGLE = false>(url: string, cache: RequestCache = 'default'): Promise<SINGLE extends false ? IResponsePayload<T> : T> {
     const session = await getServerSession(authOptions);
-
+    console.log(BASE_URL + url, 'URL');
     let res = await fetch(BASE_URL + url, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${session?.user.accessToken}`,
             'Content-Type': 'application/json'
         },
+        cache
     });
 
     if (res.status == 401) {
@@ -42,6 +43,7 @@ export async function AuthGetApi<T = any, SINGLE = false>(url: string): Promise<
                 Authorization: `Bearer ${session?.user.accessToken}`,
                 'Content-Type': 'application/json'
             },
+            cache
         });
         return await res.json();
     }

@@ -1,29 +1,33 @@
 'use client';
 
-import React, {
-    FC, useMemo, useState 
+import {
+    FC, useMemo, useState
 } from 'react';
 import {
-    Select, DatePicker, Space 
+    Select, DatePicker, Button
 } from 'antd';
-import dayjs from 'dayjs';
+import Search from 'antd/lib/input/Search';
+import { SearchOutlined } from '@ant-design/icons';
+import dayjs, { Dayjs } from 'dayjs';
+import locale from 'antd/lib/date-picker/locale/en_US';
 
-import SearchBar from '@/components/SearchBar/SearchBar';
+import useAxiosAuth from '@/hooks/useAxiosAuth';
+import { AdminsActions, useAdminsDispatch } from '@/store/admins';
+import { TableRowLimit } from '@/components/Table/index';
 
 import styles from './Table.module.scss';
 
 
-
-const { RangePicker } = DatePicker;
-
 interface ITableHeadProps {
     columns: string[];
+    dataUrl: string;
 }
-const dateFormat = 'YYYY/MM/DD';
+type RangeValue = [Dayjs | null, Dayjs | null];
 
 
-
-const TableHead: FC<ITableHeadProps> = ({ columns }) => {
+const TableHead: FC<ITableHeadProps> = ({ columns, dataUrl }) => {
+    const axios = useAxiosAuth();
+    const dispatch = useAdminsDispatch();
     const selectOptions = useMemo(() => {
         return [ 'all', ...columns ].map((c) => ({
             value: c,
@@ -31,64 +35,130 @@ const TableHead: FC<ITableHeadProps> = ({ columns }) => {
         }));
     }, [ columns ]);
 
-    const { Option } = Select;
-
-    const [ selectedValue, setSelectedValue ] = useState<string>('all'); // Set the initial value to 'all'
-    const [ searchInput, setSearchInput ] = useState<string>('');
+    const [ searchBy, setSearchBy ] = useState<string>('all'); // Set the initial value to 'all'
+    const [ search, setSearch ] = useState<string>('');
 
     const handleSelectChange = (value: string) => {
-        setSelectedValue(value);
+        setSearchBy(value || 'all');
     };
 
-    const handleSearchChange = (value: string) => {
-        setSearchInput(value);
+    const handleSearch = () => {
+        const searchParams: {search: string; searchBy?: string; limit: number} = {
+            search,
+            limit: TableRowLimit
+        };
+        if (searchBy !== 'all') {
+            searchParams.searchBy = searchBy;
+        }
+
+        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
+            dispatch(AdminsActions.UPDATE, { data });
+        });
     };
 
-    const handleSearchClick = () => {
-        // Log the selected value and search input to the console
-        console.log('Selected Value:', selectedValue);
-        console.log('Search Input:', searchInput);
+    const [ dates, setDates ] = useState<RangeValue>([ null, null ]);
+    const [ open, setOpen ] = useState(false);
+    const today = dayjs();
 
-        // Add additional logic related to search if needed
+    const disabledDate = (current: Dayjs) => {
+        return today.isBefore(current) && !today.isSame(current, 'day');
+    };
+
+    const onDone = () => {
+        const searchParams: {startDate?: string; endDate?: string; limit: number} = { limit: TableRowLimit };
+        if (dates[0]) {
+            searchParams.startDate = dates[0]?.toString();
+        }
+        if (dates[1]) {
+            searchParams.endDate = dates[1]?.toString();
+        }
+
+        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
+            dispatch(AdminsActions.UPDATE, { data });
+        });
+    };
+    const onOpenChange = (open: boolean) => {
+        console.log('onOpenChange', { open, dates });
+        if (!open) {
+            onDone();
+        }
+        setOpen(open);
     };
 
     return (
         <div className={ styles['table-head'] }>
-            <Select
-                style={{ width: 100, height: '40px' }}
-                dropdownRender={ (menu) => (
-                    <div style={{ width: 100 }}>
-                        { menu }
-                    </div>
-                ) }
-                defaultValue={ selectedValue } // Set defaultValue to the initial value
-                placeholder="Select a value"
-                onChange={ handleSelectChange }
-                value={ selectedValue }
-                allowClear={ selectedValue !== 'all' } // Show clear button only if the selected value is not 'all'
-            >
-                { selectOptions.map((el, i) => (
-                    <Option
-                        key={ i }
-                        value={ el.value }
-                    >
-                        { el.label }
-                    </Option>
-                )) }
-            </Select>
-            <SearchBar
-                onSearchClick={ handleSearchClick }
-                onSearchChange={ handleSearchChange }
-            />
-            <Space
-                direction="vertical"
-                size={ 5 }
-            >
-                <RangePicker
-                    style={{ width: 150, height: '40px' }}
-                    format={ dateFormat }
+            <div className={ styles['table-head-search'] }>
+                <Search
+                    placeholder="Search..."
+                    allowClear
+                    enterButton={ <SearchOutlined /> }
+                    onSearch={ handleSearch }
+                    onChange={ (e) => setSearch(e.target.value) }
                 />
-            </Space>
+                <Select
+                    style={{ width: 100 }}
+                    defaultValue={ searchBy }
+                    placeholder="Select a value"
+                    onChange={ handleSelectChange }
+                    allowClear={ searchBy !== 'all' }
+                >
+                    { selectOptions.map((el, i) => (
+                        <Select.Option
+                            key={ i }
+                            value={ el.value }
+                        >
+                            { el.label }
+                        </Select.Option>
+                    )) }
+                </Select>
+            </div>
+
+            <DatePicker.RangePicker
+                locale={{
+                    ...locale,
+                    lang: {
+                        ...locale.lang,
+                        ok: 'Save',
+                    }
+                }}
+                open={ open }
+                renderExtraFooter={ () => {
+                    return (
+                        <Button
+                            onClick={ () => {
+                                onDone();
+                                setOpen(false);
+                            } }
+                            size={ 'small' }
+                            type={ 'primary' }
+                            className={ styles['range-picker-done'] }
+                        >
+                            Done
+                        </Button>
+                    );
+                } }
+                style={{ width: 200 }}
+                showTime
+                // allowClear={ false }
+                // suffixIcon={ null }
+                onOk={ (dates) => {
+                    console.log(dates, 333);
+                } }
+                value={ dates }
+                disabledDate={ disabledDate }
+                onCalendarChange={ (val) => {
+                    console.log('onCalendarChange');
+                    if (val) {
+                        setDates(val);
+                    }
+                } }
+                // onChange={ (val) => {
+                //     console.log('onChange');
+                //     setValue(val);
+                // } }
+                onOpenChange={ onOpenChange }
+                // changeOnBlur
+            />
         </div>
     );
 };

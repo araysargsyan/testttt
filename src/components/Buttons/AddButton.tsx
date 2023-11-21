@@ -1,6 +1,6 @@
 'use client';
-import React, {
-    memo, useEffect, useState
+import {
+    FC, memo, useState 
 } from 'react';
 import {
     Button, Modal, Form, Input
@@ -11,13 +11,11 @@ import useAxiosAuth from '@/hooks/useAxiosAuth';
 import { AdminsActions, useAdminsDispatch } from '@/store/admins';
 
 
-const AddButton: React.FC = () => {
+const AddButton: FC = () => {
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const axios = useAxiosAuth();
     const dispatch = useAdminsDispatch();
-    useEffect(() => {
-        console.log(5555);
-    });
+
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -37,7 +35,7 @@ const AddButton: React.FC = () => {
                 role: { id: roleId }
             }).then((res) => {
                 console.log('CREATE_ADMIN: SUCCESS', res);
-                dispatch(AdminsActions.ADD, res.data);
+                dispatch(AdminsActions.ADD, { data: { result: res.data } });
             }).catch((e) => {
                 console.log('CREATE_ADMIN: ERROR', e);
             });
@@ -66,7 +64,7 @@ const AddButton: React.FC = () => {
             </Button>
             <Modal
                 title="Add Admin"
-                visible={ isModalOpen }
+                open={ isModalOpen }
                 onCancel={ handleCancel }
                 footer={ null }
             >

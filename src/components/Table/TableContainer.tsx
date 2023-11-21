@@ -2,8 +2,10 @@ import { memo } from 'react';
 
 import { AuthGetApi } from '@/lib/fetchApi';
 import { TProviders } from '@/store';
+import TableHead from '@/components/Table/TableHead';
 
 import Table from './Table';
+import { TableRowLimit } from './';
 
 
 interface ITableContainerProps {
@@ -19,21 +21,24 @@ async function TableContainer({
     isRowClickable = false,
     provider
 }: ITableContainerProps) {
-    const data = await AuthGetApi(dataUrl).then((response) => {
+    const data = await AuthGetApi(`${dataUrl}?limit=${TableRowLimit}`).then((response) => {
         console.log('TableContainer: RESPONSE', { [dataUrl]: response.count });
-        console.log('TableContainer: RESPONSE_DATA', { [dataUrl]: response.result });
-        return response.result;
+        console.log('TableContainer: RESPONSE_DATA', { [dataUrl]: response.result.length });
+        return response;
     }).catch(e => {
         console.log('TableContainer: ERROR', e);
-        return [];
+        return { result: [] };
     });
 
-    const columns = Object.keys(data[0])
+    const columns = Object.keys(data.result[0])
         .filter((k) => k !== 'id' && !ignoreColumns.includes(k));
 
     return (
         <>
-            { /*<TableHead columns={columns}/>*/ }
+            <TableHead
+                dataUrl={ dataUrl }
+                columns={ columns }
+            />
             <Table
                 dataUrl={ dataUrl }
                 provider={ provider }

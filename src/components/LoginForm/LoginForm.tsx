@@ -4,7 +4,7 @@ import {
 } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {
-    Form, Input, Button, Checkbox, type FormInstance, Alert
+    Alert, Button, Checkbox, Form, type FormInstance, Input
 } from 'antd';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -16,7 +16,6 @@ import { IUserLogin } from '@/types/common';
 import styles from './Login.module.scss';
 
 
-
 const LoginForm: FC = () => {
     const formRef = useRef<FormInstance | null>(null);
     const [ loginError, setLoginError ] = useState('');
@@ -24,8 +23,9 @@ const LoginForm: FC = () => {
 
     // useEffect(() => {
     //     console.log(ProtectedPages, 66);
-    //     router.prefetch(ProtectedPages.main);
-    // }, [ router ]);
+    //     router.prefetch(ProtectedPages.main, { kind: PrefetchKind.TEMPORARY });
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, []);
 
     const onFinish = useCallback(async (value: IUserLogin) => {
         try {
@@ -39,7 +39,6 @@ const LoginForm: FC = () => {
             console.log('onFinish', res);
 
             if (res?.ok) {
-                console.log('XXXXXIIIIII');
                 router.replace(ProtectedPages.main);
             } else {
                 if (res?.status === 401) {

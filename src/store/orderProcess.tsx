@@ -17,12 +17,6 @@ import {
 } from '@/store/types';
 
 
-// export interface IOrderProcessState {
-//     data: IOrderProcess | null;
-//     error: string;
-// }
-
-
 const OrderProcessActions = { UPDATE: 'UPDATE' } as const;
 type TAction = TActionType<typeof OrderProcessActions>;
 const initialState: IStateSchema<IOrderProcess | null> = {

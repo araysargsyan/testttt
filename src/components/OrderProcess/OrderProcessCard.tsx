@@ -39,18 +39,11 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
                     <Card
                         type={ 'inner' }
                         bordered={ false }
-                    // headStyle={{borderBottom: styles.card.border}}
                         className={ styles.card }
                         title={ `Step: ${d.step}` }
                     >
                         <CardInfo staticData={ d.staticData } />
                         <CardForm
-                            key={ 'card-buttons' }
-                        // id={storeData.state.data?.id as never}
-                        // status={d.status}
-                        // stepId={d.id}
-                        // step={d.step}
-                        // inputsData={d.inputsData}
                             step={ i }
                         />
                     </Card>

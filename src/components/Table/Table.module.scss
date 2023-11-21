@@ -4,17 +4,22 @@
   }
   &-head {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    &-search {
+      display: flex;
+    }
   }
 }
+.range-picker-done {
+  position: absolute;
+}
+
 .add-button {
   position: absolute;
   top: 20px;
   right: 24px;
-}
-.table-head{
-  border-radius: 8px;
-  //background-color: #FAFAFA;
-  max-width: 550px;
-  display: flex;
 }
 

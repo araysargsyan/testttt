@@ -64,7 +64,6 @@ main {
     position: relative;
 }
 
-/*img {*/
-/*    width: auto !important;*/
-/*    height: auto !important;*/
-/*}*/
+.ant-picker-footer-extra {
+    position: absolute;
+}

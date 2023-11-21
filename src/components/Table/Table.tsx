@@ -1,27 +1,25 @@
 'use client';
 
-import React, {
-    type FC, memo, useState
-} from 'react';
+import React, { type FC, memo } from 'react';
 import { Button } from 'antd';
-import { type TableRowSelection } from 'antd/es/table/interface';
+import { type ColumnsType } from 'antd/lib/table/interface';
+import {
+    Table as TableComponent,
+    type TableProps,
+    type PaginationProps,
+} from 'antd/lib';
 import { useRouter } from 'next/navigation';
-import { Table as TableComponent } from 'antd/lib';
 
 import upperCaseFirstLetter from '@/lib/util/upperCaseFirstLetter';
 import { TProviders, useProviderData } from '@/store';
+import useAxiosAuth from '@/hooks/useAxiosAuth';
+import { AdminsActions, useAdminsDispatch } from '@/store/admins';
 
 import styles from './Table.module.scss';
+import { TableRowLimit } from './';
 
 
-interface DataType {
-    id: string;
-    key: number;
-    name: string;
-    age: number;
-    address: string;
-    description: string;
-}
+type DataType = Record<string, any>;
 
 const Table: FC<{
     data?: any;
@@ -36,57 +34,60 @@ const Table: FC<{
     columns,
     isRowClickable,
 }) => {
-    const tableData = useProviderData(data, provider);
-    const [ selectedRowKeys, setSelectedRowKeys ] = useState<React.Key[]>([]);
-    const [ sortedInfo, setSortedInfo ] = useState<{
-        columnKey?: string;
-        order?: 'ascend' | 'descend';
-    }>({});
+    const { result: tableData, count } = useProviderData(data, provider);
+    // const tableData = result.map((d) => ({ ...d, key: d.id }));
+    // const [ selectedRowKeys, setSelectedRowKeys ] = useState<React.Key[]>([]);
     const { push } = useRouter();
+    const axios = useAxiosAuth();
+    const dispatch = useAdminsDispatch();
 
-    const handleChange = (pagination: any, filters: any, sorter: any) => {
-        // setSortedInfo({
-            // columnKey: sorter.columnKey,
-            // order: sorter.order,
-        // });
+    const orderChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter, extra) => {
+        console.log('orderChange', {
+            pagination, filters, sorter, extra
+        });
+        if (!Array.isArray(sorter) && extra.action === 'sort') {
+            const searchParams: {limit: number; orderBy: string; orderDirection?: 'ASC' | 'DESC'} = {
+                limit: pagination.pageSize!,
+                orderBy: sorter.field as string,
+            };
 
-        const columnDataIndex = sorter.columnKey || (sorter.column && sorter.column.dataIndex);
+            if (sorter) {
+                searchParams.orderDirection = sorter.order === 'ascend' ? 'ASC' : 'DESC';
+            }
 
-        if (sorter.order === 'ascend') {
-            console.log('Sorting Order: Ascending');
-        } else if (sorter.order === 'descend') {
-            console.log('Sorting Order: Descending');
-        } else {
-            console.log('Sorting Order: Unsorted');
+            console.log(searchParams);
+
+            axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
+                dispatch(AdminsActions.UPDATE, { data });
+            });
         }
-
-        console.log('Column Index:', columnDataIndex);
     };
 
-    const rowSelection: TableRowSelection<DataType> = {
-        selectedRowKeys,
-        onChange: (newSelectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-            setSelectedRowKeys(newSelectedRowKeys);
-            console.log('Selected rows:', selectedRows);
-        },
-    };
+    //? const rowSelection: TableRowSelection<DataType> = {
+    //     selectedRowKeys,
+    //     onChange: (newSelectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+    //         console.log('Selected rows:', selectedRows);
+    //         setSelectedRowKeys(newSelectedRowKeys);
+    //     },
+    //? };
 
     const handleRowClick = (record: DataType) => {
         console.log('Row clicked:', record);
         push(`${dataUrl}/${record.id}`);
     };
 
-    const columnsWithActions: any = [
+    const columnsWithActions: ColumnsType<DataType> = [
         ...columns.map((key) => ({
             title: upperCaseFirstLetter(key),
             dataIndex: key,
             key: key,
+            sorter: true,
         })),
         {
             title: 'Actions',
             dataIndex: 'actions',
             key: 'actions',
-            render: (_: any, record: DataType) => (
+            render: () => (
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <Button
                         type="primary"
@@ -107,33 +108,38 @@ const Table: FC<{
             ),
         },
     ];
+    const onPaginationChange: PaginationProps['onChange'] = (page, pageSize) => {
+        const searchParams = {
+            offset: (page - 1) * pageSize,
+            limit: pageSize
+        };
+
+        // console.log({
+        //     page, pageSize, searchParams
+        // }, 'onChange');
+
+        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
+            dispatch(AdminsActions.UPDATE, { data });
+        });
+    };
 
     return (
         <>
             <TableComponent
+                // sortDirections={ [ 'descend', 'ascend' ] }
                 rowKey={ 'id' }
+                // rowSelection={ rowSelection }
                 rowClassName={ isRowClickable ? styles['table-row'] : '' }
-                rowSelection={ rowSelection }
-                pagination={{ position: [ 'none', 'bottomRight' ] }}
-                columns={ columnsWithActions.map((column: any) => ({
-                    ...column,
-                    sorter: (a: any, b: any) => {
-                        if (column.dataIndex === 'actions') {
-                            return 0;
-                        }
-                        const valueA = a[column.dataIndex];
-                        const valueB = b[column.dataIndex];
-
-                        if (typeof valueA === 'string') {
-                            return valueA.localeCompare(valueB);
-                        } else if (typeof valueA === 'number') {
-                            return valueA - valueB;
-                        } else {
-                            return 0;
-                        }
-                    },
-                    sortOrder: sortedInfo.columnKey === column.dataIndex ? sortedInfo.order : undefined,
-                })) }
+                pagination={{
+                    // pageSizeOptions: [ '10', '20', '30' ],
+                    // onShowSizeChange,
+                    onChange: onPaginationChange,
+                    total: count,
+                    showSizeChanger: true,
+                    defaultPageSize: TableRowLimit
+                }}
+                onChange={ orderChange }
+                columns={ columnsWithActions }
                 dataSource={ tableData }
                 onRow={ (rowData: any) => ({ ...isRowClickable && { onClick: () => handleRowClick(rowData), }, }) }
             />

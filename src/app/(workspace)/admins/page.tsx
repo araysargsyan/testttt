@@ -5,8 +5,6 @@ import Spinner from '@/components/Spiner';
 import TableContainer from '@/components/Table';
 import { type IPageProps } from '@/types/core';
 import { AdminsProvider } from '@/store/admins';
-import styles from '@/components/Table/Table.module.scss';
-import AddButton from '@/components/Buttons/AddButton';
 import PageHeader from '@/components/PageHeader/PageHeader';
 
 
