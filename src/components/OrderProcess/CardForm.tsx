@@ -19,8 +19,7 @@ import {
     IResponsePayload,
     TOrderProcessStepsStatus,
 } from '@/types/common';
-import { OrderProcessActions, useOrderProcessData } from '@/store/orderProcess';
-
+import { SingleOrderProcessActions, useSingleOrderProcessData } from '@/store/singlOrderProcess';
 
 import styles from './OrderProcessCard.module.scss';
 
@@ -46,7 +45,7 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
             ? '*'
             : ''
     }Leave a comment...`;
-    const { dispatch, state } = useOrderProcessData();
+    const { dispatch, state } = useSingleOrderProcessData();
     const processStep = state.data!.processSteps[step];
 
     const clickHandler = (
@@ -93,7 +92,7 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
                 );
 
                 const res = await axios.get(`/order-process/${state.data?.id}`);
-                dispatch(OrderProcessActions.UPDATE, res.data);
+                dispatch(SingleOrderProcessActions.UPDATE, res.data);
             } catch (error) {
                 console.error('Error:', error);
             } finally {

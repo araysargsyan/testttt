@@ -10,71 +10,83 @@ import Search from 'antd/lib/input/Search';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import locale from 'antd/lib/date-picker/locale/en_US';
+import { useRouter, usePathname } from 'next/navigation';
 
 import useAxiosAuth from '@/hooks/useAxiosAuth';
-import { AdminsActions, useAdminsDispatch } from '@/store/admins';
 import { TableRowLimit } from '@/components/Table/index';
+import { TProviders, useProviderDispatch } from '@/store';
+import getSearchParams from '@/lib/getSearchParams';
 
 import styles from './Table.module.scss';
 
 
 interface ITableHeadProps {
+    searchParams: Record<string, string>;
     columns: string[];
+    provider?: TProviders;
     dataUrl: string;
 }
 type RangeValue = [Dayjs | null, Dayjs | null];
 
 
-const TableHead: FC<ITableHeadProps> = ({ columns, dataUrl }) => {
+const TableHead: FC<ITableHeadProps> = ({
+    columns, dataUrl, provider, searchParams
+}) => {
+    const router = useRouter();
+    const pathname = usePathname();
     const axios = useAxiosAuth();
-    const dispatch = useAdminsDispatch();
+    const { dispatch, actions } = useProviderDispatch(provider);
+    const [ searchBy, setSearchBy ] = useState<string>(searchParams.searchBy || 'all');
+    const [ search, setSearch ] = useState<string>(searchParams.search || '');
     const selectOptions = useMemo(() => {
         return [ 'all', ...columns ].map((c) => ({
             value: c,
             label: c,
         }));
     }, [ columns ]);
-
-    const [ searchBy, setSearchBy ] = useState<string>('all'); // Set the initial value to 'all'
-    const [ search, setSearch ] = useState<string>('');
+    const [ dates, setDates ] = useState<RangeValue>([
+        searchParams.startDate ? dayjs(searchParams.startDate) : null,
+        searchParams.endDate ? dayjs(searchParams.endDate) : null
+    ]);
+    const [ open, setOpen ] = useState(false);
+    const today = dayjs();
 
     const handleSelectChange = (value: string) => {
         setSearchBy(value || 'all');
     };
 
     const handleSearch = () => {
-        const searchParams: {search: string; searchBy?: string; limit: number} = {
+        const params: {search: string; searchBy?: string; limit: string} = {
             search,
             limit: TableRowLimit
         };
         if (searchBy !== 'all') {
-            searchParams.searchBy = searchBy;
+            params.searchBy = searchBy;
         }
 
-        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
-            dispatch(AdminsActions.UPDATE, { data });
+        axios.get(dataUrl, { params }).then(({ data }) => {
+            dispatch(actions.UPDATE, { data });
+            const urlParams = getSearchParams({ ...searchParams, ...params });
+            router.push(`${pathname}?${urlParams.toString()}`);
         });
     };
-
-    const [ dates, setDates ] = useState<RangeValue>([ null, null ]);
-    const [ open, setOpen ] = useState(false);
-    const today = dayjs();
-
     const disabledDate = (current: Dayjs) => {
         return today.isBefore(current) && !today.isSame(current, 'day');
     };
 
     const onDone = () => {
-        const searchParams: {startDate?: string; endDate?: string; limit: number} = { limit: TableRowLimit };
+        const params: {startDate?: string; endDate?: string; limit: string} = { limit: TableRowLimit };
         if (dates[0]) {
-            searchParams.startDate = dates[0]?.toString();
+            params.startDate = dates[0]?.toString();
         }
         if (dates[1]) {
-            searchParams.endDate = dates[1]?.toString();
+            params.endDate = dates[1]?.toString();
         }
 
-        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
-            dispatch(AdminsActions.UPDATE, { data });
+        axios.get(dataUrl, { params }).then(({ data }) => {
+            dispatch(actions.UPDATE, { data });
+            const urlParams = getSearchParams({ ...searchParams, ...params });
+            router.push(`${pathname}?${urlParams.toString()}`);
         });
     };
     const onOpenChange = (open: boolean) => {
@@ -89,6 +101,7 @@ const TableHead: FC<ITableHeadProps> = ({ columns, dataUrl }) => {
         <div className={ styles['table-head'] }>
             <div className={ styles['table-head-search'] }>
                 <Search
+                    defaultValue={ searchParams.search }
                     placeholder="Search..."
                     allowClear
                     enterButton={ <SearchOutlined /> }
@@ -112,7 +125,6 @@ const TableHead: FC<ITableHeadProps> = ({ columns, dataUrl }) => {
                     )) }
                 </Select>
             </div>
-
             <DatePicker.RangePicker
                 locale={{
                     ...locale,
@@ -141,15 +153,21 @@ const TableHead: FC<ITableHeadProps> = ({ columns, dataUrl }) => {
                 showTime
                 // allowClear={ false }
                 // suffixIcon={ null }
-                onOk={ (dates) => {
-                    console.log(dates, 333);
+                onOk={ (_) => {
+                    // console.log(_, 333);
                 } }
                 value={ dates }
                 disabledDate={ disabledDate }
                 onCalendarChange={ (val) => {
-                    console.log('onCalendarChange');
+                    console.log('onCalendarChange', val);
                     if (val) {
                         setDates(val);
+                    } else {
+                        setDates([ null, null ]);
+                        delete searchParams.startDate;
+                        delete searchParams.endDate;
+                        const urlParams = getSearchParams(searchParams);
+                        router.push(`${pathname}?${urlParams.toString()}`);
                     }
                 } }
                 // onChange={ (val) => {

@@ -6,19 +6,21 @@ import { PresetColorKey } from 'antd/lib/theme/interface';
 import { TOrderProcessStepsStatus } from '@/types/common';
 import camelCaseToSpaces from '@/lib/util/camelCaseToSpace';
 import CardInfo from '@/components/OrderProcess/CardInfo';
-import { useOrderProcessData } from '@/store/orderProcess';
+import AssigneeOrderProcessSelect from '@/components/Buttons/AssigneeOrderProcessSelect';
+import { useSingleOrderProcessData } from '@/store/singlOrderProcess';
 
 import styles from './OrderProcessCard.module.scss';
 import CardForm from './CardForm';
 
 
 interface IOrderProcessCardProps {
-    // data: IProcessSteps[];
     title: string;
 }
 
 function OrderProcessCard({ title }: IOrderProcessCardProps) {
-    const processSteps = useOrderProcessData().state.data?.processSteps;
+    const {
+        processSteps, id: orderProcessId, users
+    } = useSingleOrderProcessData().state.data;
 
     const status: Record<TOrderProcessStepsStatus, PresetColorKey> = {
         blocked: 'volcano',
@@ -29,7 +31,13 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
 
     return (
         <>
-            <h2 className={ styles['card-title'] }>{ title }</h2>
+            <div style={{ display: 'flex', marginBottom: '20px' }}>
+                <h2 className={ styles['card-title'] }>{ title }</h2>
+                <AssigneeOrderProcessSelect
+                    orderProcessId={ orderProcessId }
+                    users={ users }
+                />
+            </div>
             { processSteps?.map((d, i) => (
                 <Ribbon
                     text={ camelCaseToSpaces(d.status) }
@@ -44,11 +52,13 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
                     >
                         <CardInfo staticData={ d.staticData } />
                         <CardForm
+                            key={ 'card-buttons' }
                             step={ i }
                         />
                     </Card>
                 </Ribbon>
             )) }
+
         </>
     );
 }

@@ -30,6 +30,7 @@ const {
     Header, Sider, Content
 } = Layout;
 
+
 // eslint-disable-next-line react/display-name
 const Label = memo(({ item }: { item: ISideBarMenuOptions }) => {
     return (
@@ -124,13 +125,10 @@ const SidebarMenu: FC<PropsWithChildren> = ({ children }) => {
                         style={{
                             padding: 0, display: 'flex', width: '100%'
                         }}
-
                     >
-
                         { createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
                             className: 'trigger',
                             onClick: () => setCollapsed(!collapsed),
-
                         }) }
                     </Header>
                 </div>

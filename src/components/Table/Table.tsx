@@ -1,19 +1,23 @@
 'use client';
 
-import React, { type FC, memo } from 'react';
+import React, {
+    type FC, memo, useMemo
+} from 'react';
 import { Button } from 'antd';
-import { type ColumnsType } from 'antd/lib/table/interface';
+import { type ColumnsType, ColumnType } from 'antd/lib/table/interface';
 import {
     Table as TableComponent,
     type TableProps,
     type PaginationProps,
 } from 'antd/lib';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import upperCaseFirstLetter from '@/lib/util/upperCaseFirstLetter';
-import { TProviders, useProviderData } from '@/store';
+import {
+    TProviders, useProviderData, useProviderDispatch
+} from '@/store';
 import useAxiosAuth from '@/hooks/useAxiosAuth';
-import { AdminsActions, useAdminsDispatch } from '@/store/admins';
+import getSearchParams from '@/lib/getSearchParams';
 
 import styles from './Table.module.scss';
 import { TableRowLimit } from './';
@@ -22,43 +26,55 @@ import { TableRowLimit } from './';
 type DataType = Record<string, any>;
 
 const Table: FC<{
+    searchParams: Record<string, string>;
     data?: any;
     provider?: TProviders;
     dataUrl: string;
     columns: any[];
     isRowClickable: boolean;
 }> = ({
+    searchParams,
     data,
     provider,
     dataUrl,
     columns,
     isRowClickable,
 }) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    // const searchParams = useSearchParams();
+    // console.log(searchParams.toString(), 666);
     const { result: tableData, count } = useProviderData(data, provider);
+    const { dispatch, actions } = useProviderDispatch(provider);
     // const tableData = result.map((d) => ({ ...d, key: d.id }));
     // const [ selectedRowKeys, setSelectedRowKeys ] = useState<React.Key[]>([]);
     const { push } = useRouter();
     const axios = useAxiosAuth();
-    const dispatch = useAdminsDispatch();
 
     const orderChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter, extra) => {
         console.log('orderChange', {
             pagination, filters, sorter, extra
         });
         if (!Array.isArray(sorter) && extra.action === 'sort') {
-            const searchParams: {limit: number; orderBy: string; orderDirection?: 'ASC' | 'DESC'} = {
-                limit: pagination.pageSize!,
+            const params: {limit: string; orderBy?: string; orderDirection?: 'ASC' | 'DESC'} = {
+                limit: String(pagination.pageSize),
                 orderBy: sorter.field as string,
             };
 
             if (sorter) {
-                searchParams.orderDirection = sorter.order === 'ascend' ? 'ASC' : 'DESC';
+                if (sorter.order) {
+                    params.orderDirection = sorter.order === 'ascend' ? 'ASC' : 'DESC';
+                } else {
+                    params.orderBy = '';
+                    const urlParams = getSearchParams({ ...searchParams, ...params });
+                    router.push(`${pathname}?${urlParams.toString()}`);
+                }
             }
 
-            console.log(searchParams);
-
-            axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
-                dispatch(AdminsActions.UPDATE, { data });
+            axios.get(dataUrl, { params }).then(({ data }) => {
+                dispatch(actions.UPDATE, { data });
+                const urlParams = getSearchParams({ ...searchParams, ...params });
+                router.push(`${pathname}?${urlParams.toString()}`);
             });
         }
     };
@@ -77,12 +93,20 @@ const Table: FC<{
     };
 
     const columnsWithActions: ColumnsType<DataType> = [
-        ...columns.map((key) => ({
-            title: upperCaseFirstLetter(key),
-            dataIndex: key,
-            key: key,
-            sorter: true,
-        })),
+        ...columns.map((key) => {
+            const column: ColumnType<DataType> = {
+                title: upperCaseFirstLetter(key),
+                dataIndex: key,
+                key: key,
+                sorter: true,
+            };
+
+            if (searchParams.orderDirection && searchParams.orderBy === key) {
+                column.sortOrder = searchParams.orderDirection === 'ASC' ? 'ascend' : 'descend';
+            }
+
+            return column;
+        }),
         {
             title: 'Actions',
             dataIndex: 'actions',
@@ -109,20 +133,34 @@ const Table: FC<{
         },
     ];
     const onPaginationChange: PaginationProps['onChange'] = (page, pageSize) => {
-        const searchParams = {
-            offset: (page - 1) * pageSize,
-            limit: pageSize
+        const params = {
+            offset: String((page - 1) * pageSize),
+            limit: String(pageSize)
         };
 
         // console.log({
         //     page, pageSize, searchParams
         // }, 'onChange');
 
-        axios.get(dataUrl, { params: searchParams }).then(({ data }) => {
-            dispatch(AdminsActions.UPDATE, { data });
+        axios.get(dataUrl, { params }).then(({ data }) => {
+            dispatch(actions.UPDATE, { data });
+
+            const urlParams = getSearchParams({ ...searchParams, ...params });
+            router.push(`${pathname}?${urlParams.toString()}`);
         });
     };
 
+    const paginationOptions = useMemo(() => ({
+        total: count,
+        current: (Number(searchParams.offset || 0) / Number(searchParams.limit || TableRowLimit)) + 1,
+        defaultCurrent: 1,
+        pageSize: Number(searchParams.limit || TableRowLimit),
+        defaultPageSize: Number(TableRowLimit)
+    }), [ count, searchParams.limit, searchParams.offset ]);
+
+    // console.log({
+    //     paginationOptions, columnsWithActions, searchParams
+    // });
     return (
         <>
             <TableComponent
@@ -134,9 +172,8 @@ const Table: FC<{
                     // pageSizeOptions: [ '10', '20', '30' ],
                     // onShowSizeChange,
                     onChange: onPaginationChange,
-                    total: count,
                     showSizeChanger: true,
-                    defaultPageSize: TableRowLimit
+                    ...paginationOptions
                 }}
                 onChange={ orderChange }
                 columns={ columnsWithActions }

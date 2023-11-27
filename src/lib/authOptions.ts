@@ -1,12 +1,10 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { jwtDecode } from 'jwt-decode';
-import { encode } from 'next-auth/jwt';
+import { decode, encode } from 'next-auth/jwt';
 import { type AuthOptions } from 'next-auth';
 
 import {
-    EAuthCookie,
-    type IJwtPayload,
-    type IUserSession
+    EAuthCookie, type IJwtPayload, type IUserSession
 } from '@/types/common';
 
 
@@ -47,7 +45,12 @@ const authOptions: AuthOptions = {
                     console.log('authorize', { payload });
 
                     if (user) {
-                        return { ...user, ...payload };
+                        return {
+                            ...user,
+                            ...payload,
+                            maxAge: (payload.exp - Math.floor(Date.now() / 1000)),
+                            _v: process.env.NEXTAUTH_COOKIE_VERSION as string
+                        };
                     } else {
                         return null;
                     }
@@ -61,38 +64,52 @@ const authOptions: AuthOptions = {
         }),
     ],
     jwt: {
-        // decode(params) {
-        //     console.log('decode', params)
-        //     return null
-        // },
-        encode(params) {
-            const currentTime = Math.floor(Date.now() / 1000);
-            const newMaxAge = (params.token as any)?.exp - currentTime;
-            params.maxAge = newMaxAge;
+        maxAge: 0,
+        async decode(params) {
+            try {
+                const token = await decode(params);
+                // console.log('decode', token);
+                return token;
+            } catch (e) {
+                console.log('decode: ERROR', { params });
+                return null;
+            }
+        },
+        async encode(params) {
+            const maxAge = (params.token?.exp as number) - Math.floor(Date.now() / 1000);
+            // console.log('encode', { maxAge, token: { ...params.token, maxAge } });
+            const cookie = await encode({
+                token: { ...params.token, maxAge },
+                secret: params.secret,
+                maxAge
+            });
 
-            return encode(params);
+            return cookie;
         }
     },
     pages: {
         signIn: '/login',
-        verifyRequest: '/login',
-        // error: '/login'
-        // signOut: '/login',
+        verifyRequest: '/login'
     },
+    session: { maxAge: 10 },
     callbacks: {
-        async jwt({
-            token, user, account
-        }) {
-            // console.log('jwt', { token, user, account });
-            return { ...token, ...user };
+        async jwt(params) {
+            if (params.trigger === 'update') {
+                console.log('jwt: UPDATE', params.session);
+                params.token = {
+                    ...params.token,
+                    ...params.session
+                };
+            }
+            // console.log('jwt', params);
+            return { ...params.token, ...params.user, };
         },
-        async session({
-            session, token, user 
-        }) {
-            // console.log('session', { session, token, user });
-            session.user = token;
+        async session(params) {
+            // console.log('session', params.token);
 
-            return session;
+            params.session.user = params.token;
+            // console.log('session', params.session.user, params.newSession, params.trigger);
+            return params.session;
         },
     },
 };

@@ -20,17 +20,19 @@ export interface IUser {
 }
 
 export interface IJwtPayload {
-    sub: string;
     id: string;
     role: 'admin' | 'superAdmin';
-    iat: number;
     exp: number;
+    iat: number;
     jti: string;
+    sub: string;
 }
 
 export interface IUserSession extends Pick<IUser, 'firstName' | 'lastName'>, IJwtPayload {
     [EAuthCookie.ACCESS]: string;
     [EAuthCookie.REFRESH]: string;
+    maxAge: number;
+    _v: string;
 }
 
 export interface IUserLogin {
@@ -43,24 +45,6 @@ export interface IUserLogin {
 export interface IResponsePayload<T> {
     result: T;
     count?: number;
-}
-
-interface ITransaction {
-    id?: string;
-    updatedAt?: Date | string | null;
-    createdAt?: Date | string | null;
-    updatedBy?: string | null;
-    createdBy?: string | null;
-    deletedAt?: Date | string | null;
-
-    status: 'pending' | 'completed' | 'failed';
-    type: 'init' | 'retry' | 'refund' | 'cancel';
-    amount: number;
-    details: Record<string, any>;
-    paymentId: string;
-    providerOrderId: number;
-    user?: IUser;
-    // order?: any;
 }
 
 const OrderProcessStatus = {

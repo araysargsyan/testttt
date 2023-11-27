@@ -5,9 +5,9 @@ import { getServerSession } from 'next-auth';
 import { type ReactNode } from 'react';
 
 import authOptions from '@/lib/authOptions';
+import SessionProvider from '@/lib/SessionProvider';
 
 import StyledComponentsRegistry from '../lib/AntdRegistry';
-import SessionProvider from '../lib/SessionProvider';
 
 
 const inter = Inter({ subsets: [ 'latin' ] });

@@ -1,6 +1,6 @@
 'use client';
 import {
-    FC, memo, useState 
+    FC, memo, useState
 } from 'react';
 import {
     Button, Modal, Form, Input
@@ -55,13 +55,15 @@ const AddButton: FC = () => {
 
     return (
         <>
-            <Button
-                type="primary"
-                icon={ <PlusOutlined /> }
-                onClick={ showModal }
-            >
-                Add Admin
-            </Button>
+            <div style={{ display: 'flex', justifyContent: 'end' }}>
+                <Button
+                    type="primary"
+                    icon={ <PlusOutlined /> }
+                    onClick={ showModal }
+                >
+                    Add Admin
+                </Button>
+            </div>
             <Modal
                 title="Add Admin"
                 open={ isModalOpen }

@@ -1,4 +1,4 @@
-@import '~antd/dist/reset.css';
+@import 'antd/dist/reset.css';
 
 *{
     margin: 0;
@@ -66,4 +66,11 @@ main {
 
 .ant-picker-footer-extra {
     position: absolute;
+}
+
+#app-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }

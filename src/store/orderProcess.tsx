@@ -1,98 +1,66 @@
 'use client';
 
+import { __HYDRATE__ } from '@/store/index';
+import createStore from '@/lib/createStore';
 import {
-    createContext,
-    useContext,
-    useEffect,
-    useReducer,
-    type Dispatch,
-    type FC,
-    type ReactNode, Reducer,
-} from 'react';
-
-
-import { IOrderProcess } from '@/types/common';
-import {
-    IActionWithPayload, IStateSchema, TActionType
+    IStateSchema, TActionType, TReducer
 } from '@/store/types';
 
 
-const OrderProcessActions = { UPDATE: 'UPDATE' } as const;
-type TAction = TActionType<typeof OrderProcessActions>;
-const initialState: IStateSchema<IOrderProcess | null> = {
-    data: null,
+const initialState: IStateSchema<{count: number; result: Record<string, any>[]}> = {
+    _hydrated: false,
+    data: {
+        result: [],
+        count: 0
+    },
     error: ''
 };
+const OrderProcessActions = { ADD: 'ADD', UPDATE: 'UPDATE' } as const;
+
 type TInitialState = typeof initialState;
-export interface IOrderProcessProviderProps {
-    payload?: TInitialState;
-    children: ReactNode;
-}
-interface IOrderProcessContext {
-    state: typeof initialState;
-    dispatch: (actionType: TAction, payload?: any) => Promise<void> | void;
-}
+type TAction = TActionType<typeof OrderProcessActions, typeof __HYDRATE__>;
 
-const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, { payload, type }) => {
+const reducer: TReducer<TInitialState, TAction> = (state, { payload, type }) => {
+    console.log('Users: reducer', {
+        payload, type, state
+    });
     switch (type) {
-        case OrderProcessActions.UPDATE:
-            console.log('reducer', {
-                payload, type, state
-            });
-
+        case __HYDRATE__:
             return {
                 ...state,
-                data: { ...payload }
+                ...payload,
+                _hydrated: true
+            };
+        case OrderProcessActions.ADD:
+            return {
+                ...state,
+                data: {
+                    count: state.data.count + 1,
+                    result: [
+                        ...state.data.result,
+                        payload!.data!.result
+                    ]
+                },
+            };
+        case OrderProcessActions.UPDATE:
+            return {
+                ...state,
+                data: { ...payload!.data! }
             };
         default:
             return state;
     }
 };
 
-
-const update = async (dispatch: Dispatch<any>, data: IOrderProcess) => {
-    console.log('update', { data });
-    // const payload = await authService.signIn(data);
-    data && dispatch({ type: OrderProcessActions.UPDATE, payload: data });
-};
-
-const OrderProcessContext = createContext<IOrderProcessContext | null>(null);
-
-const OrderProcessProvider: FC<IOrderProcessProviderProps> = ({ payload, children }) => {
-    const [ state, dispatcher ] = useReducer(reducer, (payload || initialState) as never);
-    // const { push } = useRouter();
-
-    useEffect(() => {
-        console.log('RENDER: OrderProcessProvider');
-    });
-
-    const store = {
-        state,
-        dispatch: async (actionType, payload?) => {
-            switch (actionType) {
-                case OrderProcessActions.UPDATE:
-                    console.log('OrderProcessProvider:reducer', {
-                        payload, actionType, state
-                    });
-                    await update(dispatcher, payload);
-                    // await sleep(2000)
-                    // await push(ERoutes.HOME);
-                    break;
-                default:
-                    dispatcher({ type: actionType, payload });
-            }
-        },
-    } as IOrderProcessContext;
-
-    return (
-        <OrderProcessContext.Provider value={ store }>
-            { children }
-        </OrderProcessContext.Provider>
-    );
-};
-
-const useOrderProcessData = () => useContext(OrderProcessContext) as IOrderProcessContext;
+const {
+    Provider: OrderProcessProvider,
+    useState: getOrderProcessState,
+} = createStore<TInitialState, TAction>(initialState as never, reducer);
+const useOrderProcessDispatch = getOrderProcessState('dispatch');
 
 export {
-    OrderProcessProvider, useOrderProcessData, OrderProcessActions,
+    OrderProcessProvider,
+    OrderProcessActions,
+    getOrderProcessState,
+    useOrderProcessDispatch
 };

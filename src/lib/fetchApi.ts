@@ -1,11 +1,17 @@
-import { getServerSession } from 'next-auth';
+import { Session, getServerSession,  } from 'next-auth';
 
-import { IResponsePayload } from '@/types/common';
+import { EAuthCookie } from '@/types/common';
 
 import authOptions from './authOptions';
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export interface IAuthGetApiReturn<T = any> {
+    data: T;
+    session: Session | null;
+    newAccessToken?: string;
+}
 
 async function refreshToken(refreshToken: string) {
     const res = await fetch(BASE_URL + '/auth/refresh-access', {
@@ -15,38 +21,61 @@ async function refreshToken(refreshToken: string) {
             'Authorization': `Bearer ${refreshToken}`
         },
     });
-    const data = await res.json();
-    return data.accessToken;
+
+    console.log('refreshToken: STATUS', res.status);
+    if (res.status === 201) {
+        const data = await res.json() as {accessToken: string};
+        return data.accessToken;
+    } else {
+        console.log('REFRESH ALREADY DEAD IN SERVER REQUEST');
+        return null;
+    }
 }
 
-export async function AuthGetApi<T = any, SINGLE = false>(url: string, cache: RequestCache = 'default'): Promise<SINGLE extends false ? IResponsePayload<T> : T> {
+export async function AuthGetApi<
+    T = any,
+>(url: string, cache: RequestCache = 'default'): Promise<IAuthGetApiReturn<T>> {
     const session = await getServerSession(authOptions);
+
     console.log(BASE_URL + url, 'URL');
+    console.log(session?.user.accessToken, 'session?.user.accessToken');
     let res = await fetch(BASE_URL + url, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${session?.user.accessToken}`,
             'Content-Type': 'application/json'
         },
-        cache
+        cache,
+        // next: { revalidate: 10 }
     });
 
-    if (res.status == 401) {
-        if (session) {
-            session.user.accessToken = await refreshToken(session?.user.refreshToken);
-        }
-        console.log('after: ', session?.user.accessToken);
+    if (res.status === 401) {
+        const newAccessToken = await refreshToken(session!.user[EAuthCookie.REFRESH]);
+        console.log('after:refresh', { newAccessToken });
 
-        res = await fetch(BASE_URL + url, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${session?.user.accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            cache
-        });
-        return await res.json();
+        if (newAccessToken) {
+            res = await fetch(BASE_URL + url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${newAccessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                cache
+            });
+
+            console.log('after:refetch: STATUS', res.status);
+            return {
+                data: await res.json(),
+                newAccessToken,
+                session
+            } as IAuthGetApiReturn<T>;
+        } else {
+            throw new Error('refreshDie');
+        }
     }
 
-    return await res.json();
+    return {
+        data: await res.json(),
+        session
+    } as IAuthGetApiReturn<T>;
 }

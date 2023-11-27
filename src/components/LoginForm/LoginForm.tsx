@@ -1,6 +1,6 @@
 'use client';
 import {
-    FC, useCallback, useEffect, useRef, useState
+    FC, useCallback, useRef, useState
 } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {
@@ -8,7 +8,6 @@ import {
 } from 'antd';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types';
 
 import { ProtectedPages } from '@/constants';
 import { IUserLogin } from '@/types/common';

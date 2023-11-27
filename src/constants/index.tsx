@@ -22,6 +22,14 @@ export interface ISideBarMenuOptions {
     icon: ReactNode;
 }
 
+export const Providers = {
+    admins: 'admins',
+    users: 'users',
+    transactions: 'transactions',
+    orderProcess: 'orderProcess',
+} as const;
+
+
 export const sideBarMenuOptions: Array<ISideBarMenuOptions> = [
     {
         name: 'Dashboard',

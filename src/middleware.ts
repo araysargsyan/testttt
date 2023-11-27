@@ -3,10 +3,15 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 
 export default withAuth(
-    function middleware(req: NextRequest) {
+    async function middleware(req: NextRequest) {
         console.log('middleware: pathname', req.nextUrl.pathname);
-        console.log('middleware: auth cookie', req.cookies.get('next-auth.session-token'));
-        console.log('middleware: user', req.user);
+        // console.log('middleware: auth cookie', req.cookies.get('next-auth.session-token'));
+        // console.log('middleware: user', req.user);
+        // const token = (await getToken({
+        //     req,
+        //     secret: process.env.NEXTAUTH_SECRET as string,
+        // }))?.maxAge;
+        // console.log(token, 11111);
 
         // //! FOR EXAMPLE
         // if (
@@ -17,15 +22,15 @@ export default withAuth(
         //     return NextResponse.redirect(new URL(ProtectedPages.main, req.url));
         // }
 
-        return NextResponse.next();
+        const res = NextResponse.next();
+        return res;
     },
     {
+        // pages: { signIn: '/login' },
         callbacks: {
             authorized({ token, req }) {
-                const isAuthenticated = Boolean(token?.accessToken);
-                if (token) {
-                    req.user = token;
-                }
+                const isAuthenticated = Boolean(token && token.accessToken && token.maxAge > 0);
+
                 console.log('authorized', { isAuthenticated, token });
                 return isAuthenticated;
             },
@@ -39,6 +44,6 @@ export const config = {
         '/users',
         '/admins',
         '/order-process/:processId*',
-        '/transactions'
+        '/transactions',
     ]
 };

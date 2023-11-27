@@ -5,17 +5,18 @@ import Spinner from '@/components/Spiner';
 import TableContainer from '@/components/Table';
 import { type IPageProps } from '@/types/core';
 import { AdminsProvider } from '@/store/admins';
-import PageHeader from '@/components/PageHeader/PageHeader';
+import { Providers } from '@/constants';
 
 
-const AdminsPage: NextPage<IPageProps> = () => {
+const AdminsPage: NextPage<IPageProps> = ({ searchParams }) => {
     return (
         <AdminsProvider>
-            <PageHeader title={ 'Admins' } />
+            <h1>Admins</h1>
             <Suspense fallback={ <Spinner /> }>
                 <TableContainer
+                    searchParams={ searchParams }
                     dataUrl={ '/user/admin' }
-                    provider={ 'admins' }
+                    provider={ Providers.admins }
                 />
             </Suspense>
         </AdminsProvider>
