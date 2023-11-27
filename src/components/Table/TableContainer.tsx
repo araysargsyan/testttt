@@ -49,7 +49,7 @@ async function TableContainer({
     const columns = Object.keys(data.result[0] || [])
         .filter((k) => k !== 'id' && !ignoreColumns.includes(k));
 
-    console.log(session, 9999)
+    console.log(session, 9999);
     return (
         <UpdateAccessToken
             newAccessToken={ newAccessToken }
