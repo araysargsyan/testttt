@@ -1,7 +1,13 @@
 import NextAuth from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getToken, JWT } from 'next-auth/jwt';
+import {
+    NextRequest, NextResponse
+} from 'next/server';
+import {
+    NextApiRequest, NextApiResponse
+} from 'next';
+import {
+    getToken, JWT
+} from 'next-auth/jwt';
 
 import authOptions from '@/lib/authOptions';
 
@@ -11,7 +17,8 @@ const handler = async (req: NextRequest, res: NextResponse) => {
         req,
         secret: process.env.NEXTAUTH_SECRET as string,
     }) as unknown as JWT;
-    console.log('[...nextauth]', token);
+
+    // console.log('[...nextauth]', token);
     const response = await NextAuth(req as unknown as NextApiRequest, res as unknown as NextApiResponse, {
         ...authOptions,
         session: { maxAge: token?.maxAge || authOptions.session!.maxAge! },
@@ -31,4 +38,6 @@ const handler = async (req: NextRequest, res: NextResponse) => {
     }
     return response;
 };
-export { handler as GET, handler as POST };
+export {
+    handler as GET, handler as POST
+};

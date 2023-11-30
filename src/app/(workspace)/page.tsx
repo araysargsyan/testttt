@@ -1,4 +1,6 @@
-import { type Metadata, type NextPage } from 'next';
+import {
+    type Metadata, type NextPage 
+} from 'next';
 
 import { type IPageProps } from '@/types/core';
 

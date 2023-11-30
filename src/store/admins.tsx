@@ -15,12 +15,16 @@ const initialState: IStateSchema<{count: number; result: Record<string, any>[]}>
     },
     error: ''
 };
-const AdminsActions = { ADD: 'ADD', UPDATE: 'UPDATE' } as const;
+const AdminsActions = {
+    ADD: 'ADD', UPDATE: 'UPDATE' 
+} as const;
 
 type TInitialState = typeof initialState;
 type TAction = TActionType<typeof AdminsActions, typeof __HYDRATE__>;
 
-const reducer: TReducer<TInitialState, TAction> = (state, { payload, type }) => {
+const reducer: TReducer<TInitialState, TAction> = (state, {
+    payload, type 
+}) => {
     console.log('Admins: reducer', {
         payload, type, state
     });

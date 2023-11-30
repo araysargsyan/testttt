@@ -1,5 +1,7 @@
 import { withAuth } from 'next-auth/middleware';
-import { type NextRequest, NextResponse } from 'next/server';
+import {
+    type NextRequest, NextResponse 
+} from 'next/server';
 
 
 export default withAuth(
@@ -28,10 +30,14 @@ export default withAuth(
     {
         // pages: { signIn: '/login' },
         callbacks: {
-            authorized({ token, req }) {
+            authorized({
+                token, req 
+            }) {
                 const isAuthenticated = Boolean(token && token.accessToken && token.maxAge > 0);
 
-                console.log('authorized', { isAuthenticated, token });
+                console.log('authorized', {
+                    isAuthenticated, token 
+                });
                 return isAuthenticated;
             },
         },

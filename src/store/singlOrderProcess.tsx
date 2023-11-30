@@ -3,7 +3,6 @@
 import {
     createContext,
     useContext,
-    useEffect,
     useReducer,
     type Dispatch,
     type FC,
@@ -34,10 +33,12 @@ interface ISingleOrderProcessContext {
     dispatch: (actionType: TAction, payload?: any) => Promise<void> | void;
 }
 
-const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, { payload, type }) => {
+const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, {
+    payload, type
+}) => {
     switch (type) {
         case SingleOrderProcessActions.UPDATE:
-            console.log('reducer', {
+            console.log('SingleOrderProcess: reducer', {
                 payload, type, state
             });
 
@@ -54,18 +55,17 @@ const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, { p
 const update = async (dispatch: Dispatch<any>, data: IOrderProcess) => {
     console.log('update', { data });
     // const payload = await authService.signIn(data);
-    data && dispatch({ type: SingleOrderProcessActions.UPDATE, payload: data });
+    data && dispatch({
+        type: SingleOrderProcessActions.UPDATE, payload: data
+    });
 };
 
 const SingleOrderProcessContext = createContext<ISingleOrderProcessContext | null>(null);
 
-const SingleOrderProcessProvider: FC<ISingleOrderProcessProviderProps> = ({ payload, children }) => {
+const SingleOrderProcessProvider: FC<ISingleOrderProcessProviderProps> = ({
+    payload, children
+}) => {
     const [ state, dispatcher ] = useReducer(reducer, (payload || initialState) as never);
-    // const { push } = useRouter();
-
-    useEffect(() => {
-        console.log('RENDER: SingleOrderProcessProvider');
-    });
 
     const store = {
         state,
@@ -80,7 +80,9 @@ const SingleOrderProcessProvider: FC<ISingleOrderProcessProviderProps> = ({ payl
                     // await push(ERoutes.HOME);
                     break;
                 default:
-                    dispatcher({ type: actionType, payload });
+                    dispatcher({
+                        type: actionType, payload
+                    });
             }
         },
     } as ISingleOrderProcessContext;

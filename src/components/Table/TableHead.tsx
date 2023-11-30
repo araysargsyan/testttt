@@ -10,11 +10,15 @@ import Search from 'antd/lib/input/Search';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import locale from 'antd/lib/date-picker/locale/en_US';
-import { useRouter, usePathname } from 'next/navigation';
+import {
+    useRouter, usePathname
+} from 'next/navigation';
 
 import useAxiosAuth from '@/hooks/useAxiosAuth';
 import { TableRowLimit } from '@/components/Table/index';
-import { TProviders, useProviderDispatch } from '@/store';
+import {
+    TProviders, useProviderDispatch
+} from '@/store';
 import getSearchParams from '@/lib/getSearchParams';
 
 import styles from './Table.module.scss';
@@ -28,14 +32,15 @@ interface ITableHeadProps {
 }
 type RangeValue = [Dayjs | null, Dayjs | null];
 
-
 const TableHead: FC<ITableHeadProps> = ({
     columns, dataUrl, provider, searchParams
 }) => {
     const router = useRouter();
     const pathname = usePathname();
     const axios = useAxiosAuth();
-    const { dispatch, actions } = useProviderDispatch(provider);
+    const {
+        dispatch, actions
+    } = useProviderDispatch(provider);
     const [ searchBy, setSearchBy ] = useState<string>(searchParams.searchBy || 'all');
     const [ search, setSearch ] = useState<string>(searchParams.search || '');
     const selectOptions = useMemo(() => {
@@ -56,9 +61,10 @@ const TableHead: FC<ITableHeadProps> = ({
     };
 
     const handleSearch = () => {
-        const params: {search: string; searchBy?: string; limit: string} = {
+        const params: {search: string; searchBy?: string; limit: string} & ITableHeadProps['searchParams'] = {
+            ...searchParams,
             search,
-            limit: TableRowLimit
+            limit: TableRowLimit,
         };
         if (searchBy !== 'all') {
             params.searchBy = searchBy;
@@ -66,7 +72,7 @@ const TableHead: FC<ITableHeadProps> = ({
 
         axios.get(dataUrl, { params }).then(({ data }) => {
             dispatch(actions.UPDATE, { data });
-            const urlParams = getSearchParams({ ...searchParams, ...params });
+            const urlParams = getSearchParams(params);
             router.push(`${pathname}?${urlParams.toString()}`);
         });
     };
@@ -74,23 +80,34 @@ const TableHead: FC<ITableHeadProps> = ({
         return today.isBefore(current) && !today.isSame(current, 'day');
     };
 
-    const onDone = () => {
-        const params: {startDate?: string; endDate?: string; limit: string} = { limit: TableRowLimit };
-        if (dates[0]) {
-            params.startDate = dates[0]?.toString();
+    const onDone = (clear = false) => {
+        if (clear) {
+            setDates([ null, null ]);
+            delete searchParams.startDate;
+            delete searchParams.endDate;
         }
-        if (dates[1]) {
-            params.endDate = dates[1]?.toString();
+
+        const params: {startDate?: string; endDate?: string; limit: string} & ITableHeadProps['searchParams'] = {
+            ...searchParams,
+            limit: TableRowLimit
+        };
+
+        if (!clear) {
+            if (dates[0]) {
+                params.startDate = dates[0]?.toString();
+            }
+            if (dates[1]) {
+                params.endDate = dates[1]?.toString();
+            }
         }
 
         axios.get(dataUrl, { params }).then(({ data }) => {
             dispatch(actions.UPDATE, { data });
-            const urlParams = getSearchParams({ ...searchParams, ...params });
+            const urlParams = getSearchParams(params);
             router.push(`${pathname}?${urlParams.toString()}`);
         });
     };
     const onOpenChange = (open: boolean) => {
-        console.log('onOpenChange', { open, dates });
         if (!open) {
             onDone();
         }
@@ -151,31 +168,16 @@ const TableHead: FC<ITableHeadProps> = ({
                 } }
                 style={{ width: 200 }}
                 showTime
-                // allowClear={ false }
-                // suffixIcon={ null }
-                onOk={ (_) => {
-                    // console.log(_, 333);
-                } }
                 value={ dates }
                 disabledDate={ disabledDate }
                 onCalendarChange={ (val) => {
-                    console.log('onCalendarChange', val);
                     if (val) {
                         setDates(val);
                     } else {
-                        setDates([ null, null ]);
-                        delete searchParams.startDate;
-                        delete searchParams.endDate;
-                        const urlParams = getSearchParams(searchParams);
-                        router.push(`${pathname}?${urlParams.toString()}`);
+                        onDone(true);
                     }
                 } }
-                // onChange={ (val) => {
-                //     console.log('onChange');
-                //     setValue(val);
-                // } }
                 onOpenChange={ onOpenChange }
-                // changeOnBlur
             />
         </div>
     );

@@ -30,6 +30,26 @@ $confirm-button-color: #05ad05;
     //min-height: 150px;
     margin-top: 12px !important;
   }
+  &-upload-input {
+    width: 228px;
+    margin-bottom: 24px !important;
+    display: block;
+  }
+}
+
+.order-process {
+  &-wrapper {
+    display: flex;
+    justify-content: space-between;
+  }
+  &-steps {
+    width: 44%;
+    min-width: 276px;
+    margin-right: 40px;
+  }
+  &-flow-state {
+    flex-grow: 1;
+  }
 }
 
 .button {

@@ -15,7 +15,8 @@ module.exports = {
         'import/resolver': {
             typescript: true,
             node: true
-        }
+        },
+        'react': { version: '18' }
     },
     parser: '@typescript-eslint/parser',
     parserOptions: {
@@ -73,7 +74,7 @@ module.exports = {
         'brace-style': 'error',
         'object-curly-newline': [ 'error', {
             multiline: true,
-            minProperties: 3
+            minProperties: 2
         } ],
         //! react
         'react/jsx-curly-spacing': [
@@ -181,7 +182,6 @@ module.exports = {
         __API__: true,
         __PROJECT__: true,
     },
-    settings: { 'react': { version: '18', } },
     overrides: [
         {
             files: [ 'next.config.js' ],

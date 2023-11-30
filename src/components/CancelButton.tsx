@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Button, Input } from 'antd';
+import {
+    Button, Input 
+} from 'antd';
 
 
 const App: React.FC = () => {
@@ -22,13 +24,17 @@ const App: React.FC = () => {
         <div>
             <Button
                 onClick={ handleButtonClick }
-                style={{ color:'red', fontWeight:'bold' }}
+                style={{
+                    color:'red', fontWeight:'bold' 
+                }}
             >X
             </Button>
             { showInput && (
                 <div>
                     <Input
-                        style={{ width:'400px', height:'100px' }}
+                        style={{
+                            width:'400px', height:'100px' 
+                        }}
                         value={ inputValue }
                         onChange={ handleInputChange }
                         onBlur={ handleInputBlur }

@@ -1,4 +1,6 @@
-import { Session, getServerSession,  } from 'next-auth';
+import {
+    Session, getServerSession,
+} from 'next-auth';
 
 import { EAuthCookie } from '@/types/common';
 
@@ -38,7 +40,7 @@ export async function AuthGetApi<
     const session = await getServerSession(authOptions);
 
     console.log(BASE_URL + url, 'URL');
-    console.log(session?.user.accessToken, 'session?.user.accessToken');
+    console.log(session?.user.accessToken, 'currentAccessToken');
     let res = await fetch(BASE_URL + url, {
         method: 'GET',
         headers: {

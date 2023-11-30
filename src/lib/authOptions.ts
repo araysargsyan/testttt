@@ -1,6 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { jwtDecode } from 'jwt-decode';
-import { decode, encode } from 'next-auth/jwt';
+import {
+    decode, encode
+} from 'next-auth/jwt';
 import { type AuthOptions } from 'next-auth';
 
 import {
@@ -13,14 +15,22 @@ const authOptions: AuthOptions = {
         CredentialsProvider({
             name: 'Credentials',
             credentials: {
-                username: { name: 'Username', type: 'text' },
-                password: { name: 'Password', type: 'password' },
-                remember: { name: 'Remember', type: 'checkbox' },
+                username: {
+                    name: 'Username', type: 'text'
+                },
+                password: {
+                    name: 'Password', type: 'password'
+                },
+                remember: {
+                    name: 'Remember', type: 'checkbox'
+                },
             },
             async authorize(credentials, req) {
                 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
                 const rememberMe = credentials?.remember === 'true';
-                console.log('authorize', { BASE_URL, credentials });
+                console.log('authorize', {
+                    BASE_URL, credentials
+                });
 
                 try {
                     const res = await fetch(`${BASE_URL}/auth/admin/login`, {
@@ -38,7 +48,9 @@ const authOptions: AuthOptions = {
                     }
 
                     const user: IUserSession = await res.json();
-                    console.log('authorize', { user, rememberMe });
+                    console.log('authorize', {
+                        user, rememberMe
+                    });
                     const payload = rememberMe
                         ? jwtDecode<IJwtPayload>(user[EAuthCookie.REFRESH])
                         : jwtDecode<IJwtPayload>(user[EAuthCookie.ACCESS]);
@@ -79,7 +91,9 @@ const authOptions: AuthOptions = {
             const maxAge = (params.token?.exp as number) - Math.floor(Date.now() / 1000);
             // console.log('encode', { maxAge, token: { ...params.token, maxAge } });
             const cookie = await encode({
-                token: { ...params.token, maxAge },
+                token: {
+                    ...params.token, maxAge
+                },
                 secret: params.secret,
                 maxAge
             });
@@ -95,14 +109,16 @@ const authOptions: AuthOptions = {
     callbacks: {
         async jwt(params) {
             if (params.trigger === 'update') {
-                console.log('jwt: UPDATE', params.session);
+                // console.log('jwt: UPDATE', params.session);
                 params.token = {
                     ...params.token,
                     ...params.session
                 };
             }
             // console.log('jwt', params);
-            return { ...params.token, ...params.user, };
+            return {
+                ...params.token, ...params.user,
+            };
         },
         async session(params) {
             // console.log('session', params.token);

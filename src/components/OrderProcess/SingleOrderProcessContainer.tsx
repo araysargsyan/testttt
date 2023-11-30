@@ -1,6 +1,10 @@
-import { AuthGetApi, IAuthGetApiReturn } from '@/lib/fetchApi';
+import {
+    AuthGetApi, IAuthGetApiReturn 
+} from '@/lib/fetchApi';
 import OrderProcessCard from '@/components/OrderProcess/OrderProcessCard';
-import { EAuthCookie, IOrderProcess } from '@/types/common';
+import {
+    EAuthCookie, IOrderProcess 
+} from '@/types/common';
 import { SingleOrderProcessProvider } from '@/store/singlOrderProcess';
 import UpdateAccessToken from '@/lib/UpdateAccessToken';
 
@@ -27,7 +31,10 @@ async function SingleOrderProcessContainer({ id }: IOrderProcessProps) {
     });
 
     return (
-        <SingleOrderProcessProvider payload={{ data, error: '' }}>
+        <SingleOrderProcessProvider payload={{
+            data, error: '' 
+        }}
+        >
             <UpdateAccessToken
                 newAccessToken={ newAccessToken }
                 oldAccessToken={ session?.user[EAuthCookie.ACCESS] }

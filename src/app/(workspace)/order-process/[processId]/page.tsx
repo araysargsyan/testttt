@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
-import { type Metadata, type NextPage } from 'next';
+import {
+    type Metadata, type NextPage 
+} from 'next';
 
 import { type IOrderProcessParams } from '@/types/params';
 import { type IPageProps } from '@/types/core';

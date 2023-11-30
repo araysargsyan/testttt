@@ -8,7 +8,9 @@ import {
 import { PlusOutlined } from '@ant-design/icons';
 
 import useAxiosAuth from '@/hooks/useAxiosAuth';
-import { AdminsActions, useAdminsDispatch } from '@/store/admins';
+import {
+    AdminsActions, useAdminsDispatch 
+} from '@/store/admins';
 
 
 const AddButton: FC = () => {
@@ -55,7 +57,10 @@ const AddButton: FC = () => {
 
     return (
         <>
-            <div style={{ display: 'flex', justifyContent: 'end' }}>
+            <div style={{
+                display: 'flex', justifyContent: 'end' 
+            }}
+            >
                 <Button
                     type="primary"
                     icon={ <PlusOutlined /> }
@@ -79,14 +84,18 @@ const AddButton: FC = () => {
                     <Form.Item
                         label="Username"
                         name="username"
-                        rules={ [ { required: true, message: 'Please enter a userName!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please enter a userName!' 
+                        } ] }
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="First name"
                         name="firstName"
-                        rules={ [ { required: true, message: 'Please enter a First name!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please enter a First name!' 
+                        } ] }
                     >
                         <Input />
                     </Form.Item>
@@ -94,21 +103,27 @@ const AddButton: FC = () => {
                     <Form.Item
                         label="Last name"
                         name="lastName"
-                        rules={ [ { required: true, message: 'Please enter a Last name' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please enter a Last name' 
+                        } ] }
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={ [ { required: true, message: 'Please enter an email!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please enter an email!' 
+                        } ] }
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="Password"
                         name="password"
-                        rules={ [ { required: true, message: 'Please enter a password!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please enter a password!' 
+                        } ] }
                     >
                         <Input.Password />
                     </Form.Item>

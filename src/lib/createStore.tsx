@@ -44,11 +44,15 @@ const createStore = <
 
     const Provider: FC<PropsWithChildren<{
         defaultState?: ReducerState<R>;
-    }>> = ({ defaultState, children }) => {
+    }>> = ({
+        defaultState, children 
+    }) => {
         const [ state, dispatcher ] = useReducer<R>(reducer, defaultState || initialState);
 
         const dispatch = useCallback((actionType: A, payload?: ReducerState<R>) => {
-            return dispatcher({ type: actionType, payload } as ReducerAction<R>);
+            return dispatcher({
+                type: actionType, payload 
+            } as ReducerAction<R>);
         }, []);
 
         const store = useMemo(() => ({

@@ -1,11 +1,15 @@
 import { memo } from 'react';
 
-import { AuthGetApi, IAuthGetApiReturn } from '@/lib/fetchApi';
+import {
+    AuthGetApi, IAuthGetApiReturn 
+} from '@/lib/fetchApi';
 import { TProviders } from '@/store';
 import TableHead from '@/components/Table/TableHead';
 import getSearchParams from '@/lib/getSearchParams';
 import AddButton from '@/components/Buttons/AddButton';
-import { EAuthCookie, IResponsePayload } from '@/types/common';
+import {
+    EAuthCookie, ERole, IResponsePayload
+} from '@/types/common';
 import { Providers } from '@/constants';
 import UpdateAccessToken from '@/lib/UpdateAccessToken';
 
@@ -49,14 +53,15 @@ async function TableContainer({
     const columns = Object.keys(data.result[0] || [])
         .filter((k) => k !== 'id' && !ignoreColumns.includes(k));
 
-    console.log(session, 9999);
     return (
         <UpdateAccessToken
             newAccessToken={ newAccessToken }
             oldAccessToken={ session?.user[EAuthCookie.ACCESS] }
             isRefreshDie={ isRefreshDie }
         >
-            { provider === Providers.admins ? <AddButton /> : null }
+            { provider === Providers.admins && [ ERole.SUPER_ADMIN, ERole.MANAGER ].includes(session?.user.role as ERole)
+                ? <AddButton />
+                : null }
             <TableHead
                 searchParams={ searchParams }
                 provider={ provider }

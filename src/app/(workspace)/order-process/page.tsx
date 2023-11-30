@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
-import { type Metadata, type NextPage } from 'next';
+import {
+    type Metadata, type NextPage 
+} from 'next';
 
 import Spinner from '@/components/Spiner';
 import TableContainer from '@/components/Table';

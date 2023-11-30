@@ -8,6 +8,7 @@ import {
 import { type ReactNode } from 'react';
 
 
+export const SidebarLocalStorageKey = 'SIDEBAR_COLLAPSED' as const;
 export const ProtectedPages = {
     main: '/',
     users: '/users',

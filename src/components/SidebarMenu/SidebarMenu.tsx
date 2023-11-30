@@ -5,7 +5,7 @@ import React, {
     memo,
     useCallback,
     type FC,
-    type PropsWithChildren,
+    type PropsWithChildren, useEffect, useLayoutEffect,
 } from 'react';
 import Link from 'next/link';
 import {
@@ -20,7 +20,9 @@ import { signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-import { sideBarMenuOptions, type ISideBarMenuOptions } from '@/constants';
+import {
+    sideBarMenuOptions, type ISideBarMenuOptions, SidebarLocalStorageKey
+} from '@/constants';
 
 
 import styles from './SidebarMenu.module.scss';
@@ -46,6 +48,18 @@ const Label = memo(({ item }: { item: ISideBarMenuOptions }) => {
 const SidebarMenu: FC<PropsWithChildren> = ({ children }) => {
     const pathname = usePathname() || '/';
     const [ collapsed, setCollapsed ] = useState(false);
+
+    useLayoutEffect(() => {
+        const localStorageCollapsed = localStorage.getItem(SidebarLocalStorageKey) === 'true';
+        if (localStorageCollapsed !== collapsed) {
+            setCollapsed(localStorageCollapsed);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem(SidebarLocalStorageKey, String(collapsed));
+    }, [ collapsed ]);
 
     const generateSidebarMenuItems = useCallback((options: Array<ISideBarMenuOptions>) => {
         return options.map((option) => ({
@@ -119,7 +133,10 @@ const SidebarMenu: FC<PropsWithChildren> = ({ children }) => {
                 </div>
             </Sider>
             <Layout className="site-layout">
-                <div style={{ display: 'flex', width: '100%' }}>
+                <div style={{
+                    display: 'flex', width: '100%'
+                }}
+                >
                     <Header
                         className="site-layout-background"
                         style={{

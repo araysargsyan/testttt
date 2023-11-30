@@ -19,9 +19,21 @@ export interface IUser {
     blockedAt: Date | null;
 }
 
+export enum ERole {
+    SUPER_ADMIN = 'superAdmin',
+    ADMIN = 'admin',
+    MANAGER = 'communicationManager', // chats, mails, communication, work, problems etc.
+    CLIENT = 'client',
+    CONTENT_WRITER = 'contentWriter',
+    OPERATOR = 'operator',
+    OWNER = 'owner',
+    BUSINESS_PARTNER = 'businessPartner',
+    SERVICE_PARTNER = 'servicePartner',
+}
+
 export interface IJwtPayload {
     id: string;
-    role: 'admin' | 'superAdmin';
+    role: ERole;
     exp: number;
     iat: number;
     jti: string;
@@ -53,11 +65,17 @@ const OrderProcessStatus = {
     done: 'done',
 } as const;
 
-const OrderProcessStepsStatus = { ...OrderProcessStatus, blocked: 'blocked' };
+const OrderProcessStepsStatus = {
+    ...OrderProcessStatus, blocked: 'blocked'
+};
 
 export type TOrderProcessStepsStatus = keyof typeof OrderProcessStepsStatus;
 
-export type IInputsData = Record<string, { type: 'text' | 'number' | 'date'; value: any }>;
+export type IInputsData = Record<
+    string,
+    { type: 'text' | 'number' | 'date'; value: any }
+    | { type: 'file'; fileType: string; value: any }
+>;
 
 
 export interface IStaticData {
@@ -85,6 +103,12 @@ export interface IOrderProcess {
     name: string;
     processSteps: IProcessSteps[];
     users: any[];
+    flowState: {
+        id: string;
+        json: {
+            allValues: Record<string, any>;
+        };
+    };
     createdBy: {
         id: string;
         firstName: string;

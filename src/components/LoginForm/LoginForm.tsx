@@ -2,7 +2,9 @@
 import {
     FC, useCallback, useRef, useState
 } from 'react';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import {
+    LockOutlined, UserOutlined
+} from '@ant-design/icons';
 import {
     Alert, Button, Checkbox, Form, type FormInstance, Input
 } from 'antd';
@@ -20,12 +22,6 @@ const LoginForm: FC = () => {
     const [ loginError, setLoginError ] = useState('');
     const router = useRouter();
 
-    // useEffect(() => {
-    //     console.log(ProtectedPages, 66);
-    //     router.prefetch(ProtectedPages.main, { kind: PrefetchKind.TEMPORARY });
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, []);
-
     const onFinish = useCallback(async (value: IUserLogin) => {
         try {
             const res = await signIn('credentials', {
@@ -35,7 +31,6 @@ const LoginForm: FC = () => {
                 // callbackUrl: ProtectedPages.main,
                 redirect: false
             });
-            console.log('onFinish', res);
 
             if (res?.ok) {
                 router.replace(ProtectedPages.main);
@@ -64,7 +59,9 @@ const LoginForm: FC = () => {
                 >
                     <Form.Item
                         name="username"
-                        rules={ [ { required: true, message: 'Please input your Username!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please input your Username!'
+                        } ] }
                     >
                         <Input
                             className={ styles.loginInput }
@@ -75,7 +72,9 @@ const LoginForm: FC = () => {
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={ [ { required: true, message: 'Please input your Password!' } ] }
+                        rules={ [ {
+                            required: true, message: 'Please input your Password!'
+                        } ] }
                     >
                         <Input
                             className={ styles.loginInput }

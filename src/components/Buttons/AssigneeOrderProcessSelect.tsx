@@ -1,8 +1,10 @@
 'use client';
 import {
-    useState, useEffect, FC 
+    useState, useEffect, FC
 } from 'react';
-import { Select, Button } from 'antd';
+import {
+    Select, Button
+} from 'antd';
 
 import useAxiosAuth from '@/hooks/useAxiosAuth';
 
@@ -12,7 +14,9 @@ interface IAssigneeOrderProcessSelectProps {
     users: Array<Record<string | 'id', string>>;
 }
 
-const AssigneeOrderProcessSelect: FC<IAssigneeOrderProcessSelectProps> = ({ orderProcessId, users }) => {
+const AssigneeOrderProcessSelect: FC<IAssigneeOrderProcessSelectProps> = ({
+    orderProcessId, users
+}) => {
     const axios = useAxiosAuth();
     const [ userData, setUserData ] = useState<any[]>([]);
     const [ adminsIds, setAdminsIds ] = useState<any[]>([]);
@@ -40,11 +44,9 @@ const AssigneeOrderProcessSelect: FC<IAssigneeOrderProcessSelectProps> = ({ orde
         });
     };
 
-    const initialValue = users.map((el) => ({ value: el.id, label: el.username }));
-
-    console.log({
-        adminsIds, userData, users
-    });
+    const initialValue = users.map((el) => ({
+        value: el.id, label: el.username
+    }));
 
     return (
         <div style={{
