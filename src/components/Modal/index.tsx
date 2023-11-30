@@ -17,7 +17,9 @@ const EditModal: React.FC<EditModalProps> = ({
     const [ form ] = Form.useForm<FormInstance>();
 
     const onFinish = (values: any) => {
-        handleEdit({ ...record, ...values });
+        handleEdit({
+            ...record, ...values 
+        });
         form.resetFields();
         handleCancel();
     };

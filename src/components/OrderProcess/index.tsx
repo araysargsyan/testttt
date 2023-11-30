@@ -17,7 +17,10 @@ async function OrderProcess({ id }: IOrderProcessProps) {
     console.log('OrderProcess', data);
 
     return (
-        <OrderProcessProvider payload={{ data, error: '' }}>
+        <OrderProcessProvider payload={{
+            data, error: '' 
+        }}
+        >
             <OrderProcessCard
                 // data={ data.processSteps }
                 title={ data.name }
