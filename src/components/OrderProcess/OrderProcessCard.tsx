@@ -5,11 +5,13 @@ import {
 import Ribbon from 'antd/lib/badge/Ribbon';
 import { PresetColorKey } from 'antd/lib/theme/interface';
 import { useSession } from 'next-auth/react';
-import { useCallback } from 'react';
+import {
+    useCallback, useMemo
+} from 'react';
 import dayjs from 'dayjs';
 
 import {
-    ERole, TOrderProcessStepsStatus
+    ERole, IOrderProcessDocuments, TOrderProcessStepsStatus
 } from '@/types/common';
 import camelCaseToSpaces from '@/lib/util/camelCaseToSpace';
 import CardInfo from '@/components/OrderProcess/CardInfo';
@@ -27,7 +29,11 @@ interface IOrderProcessCardProps {
 
 function OrderProcessCard({ title }: IOrderProcessCardProps) {
     const {
-        processSteps, id: orderProcessId, users, flowState: { json: { allValues } }
+        processSteps,
+        id: orderProcessId,
+        users,
+        flowState: { json: { allValues } },
+        documents
     } = useSingleOrderProcessData().state.data;
     const { data: session } = useSession();
 
@@ -37,6 +43,15 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
         inProcess: 'cyan',
         done: 'green',
     };
+
+    const uploadedDocuments = useMemo(() => {
+        const docs: Record<string, IOrderProcessDocuments> = {};
+        documents.forEach((document) => {
+            docs[document.name] = document;
+        });
+
+        return docs;
+    }, [ documents ]);
 
     const renderDeepJson = useCallback((jsonKeysArray: string[], json: Record<string, any>) => {
         return (
@@ -97,6 +112,7 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
                             >
                                 <CardInfo staticData={ d.staticData } />
                                 <CardForm
+                                    uploadedDocuments={ uploadedDocuments }
                                     key={ 'card-buttons' }
                                     step={ i }
                                 />

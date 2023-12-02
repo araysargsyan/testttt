@@ -1,12 +1,14 @@
 import {
-    FC,
+    type FC,
+    type MouseEvent,
     useCallback,
     useRef,
     useState,
-    useMemo
+    useMemo, useEffect
 } from 'react';
 import {
-    Button, DatePicker, Form, FormInstance, Input, Space, Upload, UploadFile, UploadProps
+    type FormInstance, type UploadFile, type UploadProps,
+    Button, DatePicker, Form, Input, Space, Upload,
 } from 'antd';
 import {
     CheckOutlined, CloseOutlined, UploadOutlined
@@ -14,19 +16,21 @@ import {
 import TextArea from 'antd/lib/input/TextArea';
 import dayjs from 'dayjs';
 import {
-    RcFile, UploadChangeParam
+    type RcFile,
+    type UploadChangeParam
 } from 'antd/lib/upload';
 
 import useAxiosAuth from '@/hooks/useAxiosAuth';
 import camelCaseToSpaces from '@/lib/util/camelCaseToSpace';
 import {
-    IInputsData,
-    IResponsePayload,
-    TOrderProcessStepsStatus,
+    type IInputsData,
+    type IOrderProcessDocuments,
+    type IResponsePayload,
 } from '@/types/common';
 import {
     SingleOrderProcessActions, useSingleOrderProcessData
 } from '@/store/singlOrderProcess';
+import getBase64 from '@/lib/util/getBase64';
 
 import styles from './OrderProcessCard.module.scss';
 
@@ -34,14 +38,13 @@ import styles from './OrderProcessCard.module.scss';
 type TButtons = 'done' | 'blocked';
 
 interface ICardFormProps {
-    stepId?: string;
-    id?: string;
+    uploadedDocuments: Record<string, IOrderProcessDocuments>;
     step: number;
-    inputsData?: IInputsData;
-    status?: TOrderProcessStepsStatus;
 }
 
-const CardForm: FC<ICardFormProps> = ({ step }) => {
+const CardForm: FC<ICardFormProps> = ({
+    step, uploadedDocuments
+}) => {
     const axios = useAxiosAuth();
     const [ showTextArea, setShowTextArea ] = useState<boolean>(false);
     const formRef = useRef<FormInstance | null>(null);
@@ -57,12 +60,75 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
     } = useSingleOrderProcessData();
     const processStep = state.data!.processSteps[step];
     const orderProcessId = state.data!.id;
-    console.log(state.data);
+    const commentValue = processStep.comment;
+    const status = processStep.status;
+    const inputsData = processStep.inputsData;
+    const isCommentDisabled = [ 'pending', 'done' ].includes(status) && Boolean(commentValue);
+    const initialInputsDataValue = useMemo(() => {
+        const result: Record<string, any> = {};
 
-    const clickHandler = (
-        type: TButtons,
-        e: React.MouseEvent<HTMLButtonElement>
-    ) => {
+        Object.keys(inputsData).forEach((key) => {
+            const field = inputsData[key as keyof IInputsData];
+            if (field.type !== 'file') {
+                result[key] = field.type === 'date' ? dayjs(field.value) : field.value;
+            }
+        });
+
+        return result;
+    }, [ inputsData ]);
+    const getDefaultFileList = useMemo(() => {
+        const defaultFileList: Record<string, UploadFile> = {};
+
+        Object.keys(inputsData).forEach((key) => {
+            if (uploadedDocuments[key]) {
+                defaultFileList[key] = {
+                    uid: uploadedDocuments[key].id,
+                    name: uploadedDocuments[key].name,
+                    type: uploadedDocuments[key].contentType,
+                    status: 'uploading',
+                    percent: 0,
+                };
+            }
+        });
+
+        return defaultFileList;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    const [ fileList, setFileList ] = useState<Record<string, UploadFile>>(getDefaultFileList);
+
+    useEffect(() => {
+        Object.keys(inputsData).forEach((key) => {
+            if (uploadedDocuments[key]) {
+                axios.get<string>(`/document/image/${uploadedDocuments[key].id}`)
+                    .then((res) => {
+                        console.log(`GET_DOCUMENT[id=${uploadedDocuments[key].id}]: STATUS`, res.status);
+                        setFileList((prevState) => ({
+                            ...prevState,
+                            [key]: {
+                                ...prevState[key],
+                                url: res.data,
+                                status: 'done',
+                                percent: 100
+                            }
+                        }));
+                    })
+                    .catch((e) => {
+                        console.log(`GET_DOCUMENT[id=${uploadedDocuments[key].id}]: ERROR`, e);
+                        setFileList((prevState) => ({
+                            ...prevState,
+                            [key]: {
+                                ...prevState[key],
+                                status: 'error',
+                                percent: 100
+                            }
+                        }));
+                    });
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const onStepSubmit = (type: TButtons, e: MouseEvent<HTMLButtonElement>) => {
         if (!showTextArea && !buttonType.current) {
             e.preventDefault();
             setShowTextArea(true);
@@ -71,7 +137,6 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
     };
 
     const onFinish = useCallback(async (value: { comment: string }) => {
-        console.log('onFinish');
         const {
             comment, ...inputsData
         } = value;
@@ -112,51 +177,35 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
             buttonType.current = null;
             setShowTextArea(false);
         }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const commentValue = processStep.comment;
-    const status = processStep.status;
-    const inputsData = processStep.inputsData;
-    const isCommentDisabled =
-        [ 'pending', 'done' ].includes(status) && Boolean(commentValue);
-
-    const initialInputsDataValue = useMemo(() => {
-        const result: any = {};
-
-        Object.keys(inputsData).forEach((key) => {
-            const field = inputsData[key as keyof IInputsData];
-            if (field.type !== 'file') {
-                result[key] = field.type === 'date' ? dayjs(field.value) : field.value;
-            }
-        });
-
-        console.log(result, 111);
-        return result;
-    }, [ inputsData ]);
-
-    console.log(inputsData, 666);
-    const getBase64 = (img: RcFile, callback: (url: string) => void) => {
-        const reader = new FileReader();
-        console.log(reader, 2233);
-        reader.addEventListener('load', () => callback(reader.result as string));
-        reader.readAsDataURL(img);
+    const onUploadChange = (key: string, info: UploadChangeParam<UploadFile>): void => {
+        setFileList((prevState) => ({
+            ...prevState,
+            [key]: info.fileList[0]
+        }));
     };
 
-    const uploadChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
-        console.log('uploadChange', info);
-        if (info.file.status === 'uploading') {
-            // setLoading(true);
-            return;
-        }
-        if (info.file.status === 'done') {
-            // Get this url from response in real world.
-            // getBase64(info.file.originFileObj as RcFile, (url) => {
-            //     console.log('uploadChange: getBase64', url);
-            //     // setLoading(false);
-            //     // setImageUrl(url);
-            // });
-        }
+    const onUpload: UploadProps['customRequest'] = (options) => {
+        options.onProgress?.({ percent: 0 });
+        getBase64(options.file as RcFile, (url) => {
+            axios.put('/document/order-process/save', {
+                imageBase64: url,
+                name: options.filename,
+                orderProcessId: orderProcessId
+            }).then((res) => {
+                console.log(`UPDATE_DOCUMENT[name=${options.filename}]: STATUS`, res.status);
+                if (res.status === 200) {
+                    options.onSuccess?.('Ok');
+                } else {
+                    options.onError?.(new Error('Error'));
+                }
+            }).catch((err) => {
+                console.log(`UPDATE_DOCUMENT[name=${options.filename}]: ERROR`, err);
+                options.onError?.(err);
+            });
+        });
     };
 
     return (
@@ -190,57 +239,30 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
                                     size={ 12 }
                                 >
                                     <DatePicker
-                                        disabled={ status === 'pending' }
+                                        disabled={ [ 'pending', 'done' ].includes(status) }
                                         style={{ width: '228px' }}
-                                        // defaultValue={ dayjs() }
+                                        defaultValue={ initialInputsDataValue[key] }
                                     />
                                 </Space>
-                            ) : <Input disabled={ status === 'pending' } /> }
+                            ) : <Input disabled={ [ 'pending', 'done' ].includes(status) } /> }
                         </Form.Item>
                     ) : (
                         <Upload
-                            disabled={ status === 'pending' }
+                            fileList={ fileList[key] ? [ fileList[key] ] : [] }
+                            disabled={ [ 'pending', 'done' ].includes(status) }
                             rootClassName={ styles['card-upload-input'] }
                             key={ key }
                             accept={ `.${field.fileType}` }
-                            customRequest={ (options) => {
-                                console.log('customRequest', options);
-                                getBase64(options.file as RcFile, (url) => {
-                                    console.log({
-                                        name: options.filename,
-                                        orderProcessId: processStep.id
-                                    });
-                                    axios.put('/document/order-process/save', {
-                                        imageBase64: url,
-                                        name: options.filename,
-                                        orderProcessId: orderProcessId
-                                    }).then((d) => {
-                                        console.log(d, 888888888888);
-                                        if (d.status === 200) {
-                                            options.onSuccess?.('Ok');
-                                        } else {
-                                            options.onError?.(new Error('xz'));
-                                        }
-                                    }).catch((err) => {
-                                        console.log('Error', err, 888888888888);
-                                        options.onError?.(err);
-                                    });
-                                });
-                            } }
+                            customRequest={ onUpload }
+                            maxCount={ 1 }
                             multiple={ false }
                             name={ key }
                             listType="picture"
-                            onChange={ uploadChange }
-                            onDownload={ (file) => {
-                                console.log('onDownload', file);
-                            } }
-                            // defaultFileList={ [] }
-                            // fileList={ [] }
-                            // showUploadList={ false }
+                            onChange={ onUploadChange.bind(null, key) }
                         >
                             <Button
                                 style={{ width: '228px' }}
-                                disabled={ status === 'pending' }
+                                disabled={ [ 'pending', 'done' ].includes(status) }
                                 icon={ <UploadOutlined /> }
                             >
                                 { key }
@@ -255,7 +277,7 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
                         htmlType="submit"
                         className={ styles['button-confirm'] }
                         icon={ <CheckOutlined /> }
-                        onClick={ clickHandler.bind(null, 'done') }
+                        onClick={ onStepSubmit.bind(null, 'done') }
                     >
                         Done
                     </Button>
@@ -265,7 +287,7 @@ const CardForm: FC<ICardFormProps> = ({ step }) => {
                         danger
                         htmlType="submit"
                         icon={ <CloseOutlined /> }
-                        onClick={ clickHandler.bind(null, 'blocked') }
+                        onClick={ onStepSubmit.bind(null, 'blocked') }
                     >
                         Problem
                     </Button>

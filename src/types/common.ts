@@ -94,11 +94,18 @@ export interface IProcessSteps {
     documents: any[];
 }
 
+export interface IOrderProcessDocuments {
+    contentType: string;//"application/pdf"
+    id: string;
+    name: string;
+}
+
 export interface IOrderProcess {
     id: string;
     createdAt: Date | null;
     updatedAt: Date | null;
     deletedAt: Date | null;
+    documents: IOrderProcessDocuments[];
     status: keyof typeof OrderProcessStatus;
     name: string;
     processSteps: IProcessSteps[];
