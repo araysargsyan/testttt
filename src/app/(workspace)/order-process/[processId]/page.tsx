@@ -1,6 +1,8 @@
-import { Suspense } from 'react';
 import {
-    type Metadata, type NextPage 
+    memo, Suspense 
+} from 'react';
+import {
+    type Metadata, type NextPage
 } from 'next';
 
 import { type IOrderProcessParams } from '@/types/params';
@@ -17,6 +19,6 @@ const SingleOrderProcessPage: NextPage<IPageProps<IOrderProcessParams>> = ({ par
     );
 };
 
-export default SingleOrderProcessPage;
+export default memo(SingleOrderProcessPage);
 
 export const metadata: Metadata = { title: 'Single Order Process', };

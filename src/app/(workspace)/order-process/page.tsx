@@ -1,6 +1,8 @@
-import { Suspense } from 'react';
 import {
-    type Metadata, type NextPage 
+    memo, Suspense 
+} from 'react';
+import {
+    type Metadata, type NextPage
 } from 'next';
 
 import Spinner from '@/components/Spiner';
@@ -27,7 +29,7 @@ const OrderProcessPage: NextPage<IPageProps> = ({ searchParams }) => {
     );
 };
 
-export default OrderProcessPage;
+export default memo(OrderProcessPage);
 
 export const metadata: Metadata = { title: 'Order Process List', };
 

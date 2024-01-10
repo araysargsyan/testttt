@@ -3,11 +3,22 @@ $confirm-button-color: #05ad05;
 .card {
   border: 2px solid #f0f0f0;
   margin-bottom: 20px !important;
+  &-upload-input {
+    width: 228px;
+    margin-bottom: 24px !important;
+    display: block;
+  }
   &:nth-last-child {
     margin-bottom: 0 !important;
   }
-  &-form {
-    //max-width: 288px;
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  &-header-buttons {
+    display: flex;
+    margin-left: 40px;
   }
   &-title {
     margin-bottom: 20px;
@@ -29,11 +40,6 @@ $confirm-button-color: #05ad05;
   &-comment {
     //min-height: 150px;
     margin-top: 12px !important;
-  }
-  &-upload-input {
-    width: 228px;
-    margin-bottom: 24px !important;
-    display: block;
   }
 }
 

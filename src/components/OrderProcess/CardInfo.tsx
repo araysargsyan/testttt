@@ -1,4 +1,6 @@
-import { FC } from 'react';
+import {
+    FC, memo
+} from 'react';
 
 import { IStaticData } from '@/types/common';
 import camelCaseToSpaces from '@/lib/util/camelCaseToSpace';
@@ -24,4 +26,4 @@ const CardInfo: FC<ICardInfo> = ({ staticData }) => {
     );
 };
 
-export default CardInfo;
+export default memo(CardInfo);

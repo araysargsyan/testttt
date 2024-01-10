@@ -12,6 +12,9 @@ import {
     getTransactionsState, TransactionsActions, useTransactionsDispatch
 } from '@/store/transactions';
 import {
+    getContactRequestsState, ContactRequestsActions, useContactRequestsDispatch
+} from '@/store/contactRequests';
+import {
     getOrderProcessState, OrderProcessActions, useOrderProcessDispatch
 } from '@/store/orderProcess';
 
@@ -30,6 +33,9 @@ export const useProviderData = (data: any, provider?: TProviders) => {
             break;
         case Providers.transactions:
             state = getTransactionsState('state')({ data }).data;
+            break;
+        case Providers.contactRequests:
+            state = getContactRequestsState('state')({ data }).data;
             break;
         case Providers.orderProcess:
             state = getOrderProcessState('state')({ data }).data;
@@ -62,6 +68,11 @@ export const useProviderDispatch = (provider?: TProviders) => {
             obj.actions = TransactionsActions;
             // eslint-disable-next-line react-hooks/rules-of-hooks
             obj.dispatch = useTransactionsDispatch();
+            break;
+        case Providers.contactRequests:
+            obj.actions = ContactRequestsActions;
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            obj.dispatch = useContactRequestsDispatch();
             break;
         case Providers.orderProcess:
             obj.actions = OrderProcessActions;

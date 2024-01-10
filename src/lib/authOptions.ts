@@ -25,7 +25,7 @@ const authOptions: AuthOptions = {
                     name: 'Remember', type: 'checkbox'
                 },
             },
-            async authorize(credentials, req) {
+            async authorize(credentials, _) {
                 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
                 const rememberMe = credentials?.remember === 'true';
                 console.log('authorize', {
@@ -48,13 +48,13 @@ const authOptions: AuthOptions = {
                     }
 
                     const user: IUserSession = await res.json();
-                    console.log('authorize', {
-                        user, rememberMe
-                    });
+                    // console.log('authorize', {
+                    //     user, rememberMe
+                    // });
                     const payload = rememberMe
                         ? jwtDecode<IJwtPayload>(user[EAuthCookie.REFRESH])
                         : jwtDecode<IJwtPayload>(user[EAuthCookie.ACCESS]);
-                    console.log('authorize', { payload });
+                    // console.log('authorize', { payload });
 
                     if (user) {
                         return {
@@ -69,6 +69,7 @@ const authOptions: AuthOptions = {
 
                 } catch (e) {
                     console.log('authorize: ERROR', e);
+                    console.log('authorize: ERROR', JSON.stringify(e, null, 2));
 
                     return null;
                 }

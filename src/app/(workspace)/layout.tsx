@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import SidebarMenu from '@/components/SidebarMenu/SidebarMenu';
+import axios from '@/lib/axios';
 
 
 // export const dynamic = 'force-dynamic';

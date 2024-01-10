@@ -6,21 +6,24 @@ import Ribbon from 'antd/lib/badge/Ribbon';
 import { PresetColorKey } from 'antd/lib/theme/interface';
 import { useSession } from 'next-auth/react';
 import {
-    useCallback, useMemo
+    memo,
+    useCallback,
 } from 'react';
 import dayjs from 'dayjs';
 
 import {
-    ERole, IOrderProcessDocuments, TOrderProcessStepsStatus
+    ERole, TOrderProcessStepsStatus
 } from '@/types/common';
 import camelCaseToSpaces from '@/lib/util/camelCaseToSpace';
 import CardInfo from '@/components/OrderProcess/CardInfo';
-import AssigneeOrderProcessSelect from '@/components/Buttons/AssigneeOrderProcessSelect';
+import AssigneeOrderProcessSelect from '@/components/Forms/AssigneeOrderProcessSelect';
 import { useSingleOrderProcessData } from '@/store/singlOrderProcess';
 import isDateStringValid from '@/lib/util/isDateStringValid';
+import AddInput from '@/components/Forms/AddInput/AddInput';
 
 import styles from './OrderProcessCard.module.scss';
 import CardForm from './CardForm';
+import OrderProcessInputs from './OrderProcessInputs';
 
 
 interface IOrderProcessCardProps {
@@ -33,7 +36,6 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
         id: orderProcessId,
         users,
         flowState: { json: { allValues } },
-        documents
     } = useSingleOrderProcessData().state.data;
     const { data: session } = useSession();
 
@@ -43,15 +45,6 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
         inProcess: 'cyan',
         done: 'green',
     };
-
-    const uploadedDocuments = useMemo(() => {
-        const docs: Record<string, IOrderProcessDocuments> = {};
-        documents.forEach((document) => {
-            docs[document.name] = document;
-        });
-
-        return docs;
-    }, [ documents ]);
 
     const renderDeepJson = useCallback((jsonKeysArray: string[], json: Record<string, any>) => {
         return (
@@ -84,18 +77,18 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
 
     return (
         <>
-            { [ ERole.SUPER_ADMIN, ERole.MANAGER ].includes(session?.user.role as ERole) ? (
-                <div style={{
-                    display: 'flex', marginBottom: '20px'
-                }}
-                >
-                    <h2 className={ styles['card-title'] }>{ title }</h2>
-                    <AssigneeOrderProcessSelect
-                        orderProcessId={ orderProcessId }
-                        users={ users }
-                    />
-                </div>
-            ) : null }
+            <div className={ styles['card-header'] }>
+                <h2 className={ styles['card-title'] }>{ title }</h2>
+                { [ ERole.SUPER_ADMIN, ERole.MANAGER ].includes(session?.user.role as ERole) ? (
+                    <div className={ styles['card-header-buttons'] }>
+                        <AddInput id={ orderProcessId } />
+                        <AssigneeOrderProcessSelect
+                            orderProcessId={ orderProcessId }
+                            users={ users }
+                        />
+                    </div>
+                ) : null }
+            </div>
             <div className={ styles['order-process-wrapper'] }>
                 <div className={ styles['order-process-steps'] }>
                     { processSteps?.map((d, i) => (
@@ -112,7 +105,6 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
                             >
                                 <CardInfo staticData={ d.staticData } />
                                 <CardForm
-                                    uploadedDocuments={ uploadedDocuments }
                                     key={ 'card-buttons' }
                                     step={ i }
                                 />
@@ -124,8 +116,10 @@ function OrderProcessCard({ title }: IOrderProcessCardProps) {
                     { renderDeepJson(Object.keys(allValues), allValues) }
                 </div>
             </div>
+            <OrderProcessInputs />
+
         </>
     );
 }
 
-export default OrderProcessCard;
+export default memo(OrderProcessCard);

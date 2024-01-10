@@ -16,14 +16,13 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
 } from '@ant-design/icons';
-import { signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 import {
     sideBarMenuOptions, type ISideBarMenuOptions, SidebarLocalStorageKey
 } from '@/constants';
-
+import logout from '@/lib/util/logout';
 
 import styles from './SidebarMenu.module.scss';
 
@@ -122,7 +121,7 @@ const SidebarMenu: FC<PropsWithChildren> = ({ children }) => {
                     </div>
                     <div
                         className={ styles.logout }
-                        onClick={ () => signOut({ callbackUrl: '/login' }) }
+                        onClick={ () => logout() }
                     >
                         { collapsed ? <LogoutOutlined /> : (
                             <Button style={{ maxWidth: 100 }}>

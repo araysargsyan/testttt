@@ -1,6 +1,6 @@
 'use client';
 import {
-    FC, useCallback, useRef, useState
+    FC, useCallback, useLayoutEffect, useRef, useState
 } from 'react';
 import {
     LockOutlined, UserOutlined
@@ -12,7 +12,10 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { ProtectedPages } from '@/constants';
-import { IUserLogin } from '@/types/common';
+import {
+    EAuthCookie, IUserLogin
+} from '@/types/common';
+import setAccessToken from '@/lib/util/setAccessToken';
 
 import styles from './Login.module.scss';
 
@@ -21,6 +24,12 @@ const LoginForm: FC = () => {
     const formRef = useRef<FormInstance | null>(null);
     const [ loginError, setLoginError ] = useState('');
     const router = useRouter();
+
+    useLayoutEffect(() => {
+        if (localStorage.getItem(EAuthCookie.ACCESS)) {
+            localStorage.removeItem(EAuthCookie.ACCESS);
+        }
+    }, []);
 
     const onFinish = useCallback(async (value: IUserLogin) => {
         try {
@@ -33,6 +42,7 @@ const LoginForm: FC = () => {
             });
 
             if (res?.ok) {
+                setAccessToken();
                 router.replace(ProtectedPages.main);
             } else {
                 if (res?.status === 401) {

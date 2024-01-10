@@ -14,7 +14,8 @@ export const ProtectedPages = {
     users: '/users',
     admins: '/admins',
     orderProcess: '/order-process',
-    transactions: '/transactions'
+    transactions: '/transactions',
+    contactRequests: '/contact-requests',
 } as const;
 
 export interface ISideBarMenuOptions {
@@ -28,6 +29,7 @@ export const Providers = {
     users: 'users',
     transactions: 'transactions',
     orderProcess: 'orderProcess',
+    contactRequests: 'contactRequests',
 } as const;
 
 
@@ -55,6 +57,11 @@ export const sideBarMenuOptions: Array<ISideBarMenuOptions> = [
     {
         name: 'Transactions',
         path: ProtectedPages.transactions,
+        icon: <TransactionOutlined />
+    },
+    {
+        name: 'Contact requests',
+        path: ProtectedPages.contactRequests,
         icon: <TransactionOutlined />
     }
 ];

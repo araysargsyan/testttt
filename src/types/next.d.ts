@@ -1,7 +1,14 @@
 import { NextRequest as NR } from 'next/server';
+import { AxiosResponse as AxiosResponseDefault } from 'axios';
 
 import { IUserSession } from '@/types/common';
 
+
+declare module 'axios' {
+    interface AxiosResponse<T = any> extends AxiosResponseDefault<T> {
+        newAccessToken?: string;
+    }
+}
 
 declare module 'next/server' {
     interface NextRequest extends NR {
@@ -29,3 +36,9 @@ declare module 'next-auth/jwt' {
 type DeepPartial<T> = T extends object ? {
     [P in keyof T]?: DeepPartial<T[P]>;
 } : T;
+
+declare global {
+    interface URLSearchParams {
+        toObject: () => Record<string, string>;
+    }
+}

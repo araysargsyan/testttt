@@ -15,17 +15,17 @@ const initialState: IStateSchema<{count: number; result: Record<string, any>[]}>
     },
     error: ''
 };
-const OrderProcessActions = {
+const ContactRequestsActions = {
     ADD: 'ADD', UPDATE: 'UPDATE'
 } as const;
 
 type TInitialState = typeof initialState;
-type TAction = TActionType<typeof OrderProcessActions, typeof __HYDRATE__>;
+type TAction = TActionType<typeof ContactRequestsActions, typeof __HYDRATE__>;
 
 const reducer: TReducer<TInitialState, TAction> = (state, {
     payload, type
 }) => {
-    // console.log('OrderProcess: reducer', {
+    // console.log('ContactRequests: reducer', {
     //     payload, type, state
     // });
     switch (type) {
@@ -35,7 +35,7 @@ const reducer: TReducer<TInitialState, TAction> = (state, {
                 ...payload,
                 _hydrated: true
             };
-        case OrderProcessActions.ADD:
+        case ContactRequestsActions.ADD:
             return {
                 ...state,
                 data: {
@@ -46,7 +46,7 @@ const reducer: TReducer<TInitialState, TAction> = (state, {
                     ]
                 },
             };
-        case OrderProcessActions.UPDATE:
+        case ContactRequestsActions.UPDATE:
             return {
                 ...state,
                 data: { ...payload!.data! }
@@ -57,14 +57,14 @@ const reducer: TReducer<TInitialState, TAction> = (state, {
 };
 
 const {
-    Provider: OrderProcessProvider,
-    useState: getOrderProcessState,
-} = createStore<TInitialState, TAction>(initialState as never, reducer);
-const useOrderProcessDispatch = getOrderProcessState('dispatch');
+    Provider: ContactRequestsProvider,
+    useState: getContactRequestsState,
+} = createStore<TInitialState, TAction>(initialState, reducer);
+const useContactRequestsDispatch = getContactRequestsState('dispatch');
 
 export {
-    OrderProcessProvider,
-    OrderProcessActions,
-    getOrderProcessState,
-    useOrderProcessDispatch
+    ContactRequestsProvider,
+    ContactRequestsActions,
+    getContactRequestsState,
+    useContactRequestsDispatch
 };

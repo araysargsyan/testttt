@@ -1,12 +1,12 @@
 import { memo } from 'react';
 
 import {
-    AuthGetApi, IAuthGetApiReturn 
+    AuthGetApi, IAuthGetApiReturn
 } from '@/lib/fetchApi';
 import { TProviders } from '@/store';
 import TableHead from '@/components/Table/TableHead';
 import getSearchParams from '@/lib/getSearchParams';
-import AddButton from '@/components/Buttons/AddButton';
+import AddAdmin from '@/components/Forms/AddAdmin';
 import {
     EAuthCookie, ERole, IResponsePayload
 } from '@/types/common';
@@ -18,7 +18,7 @@ import { TableRowLimit } from './';
 
 
 interface ITableContainerProps {
-    searchParams?: Record<string, string>;
+    searchParams: Record<string, string>;
     dataUrl: string;
     ignoreColumns?: string[];
     isRowClickable?: boolean;
@@ -27,20 +27,20 @@ interface ITableContainerProps {
 
 async function TableContainer({
     dataUrl,
-    searchParams = { limit: TableRowLimit },
+    searchParams,
     ignoreColumns = [],
     isRowClickable = false,
     provider
 }: ITableContainerProps) {
-    const urlParams = getSearchParams(searchParams).toString();
+    const urlParams = getSearchParams(searchParams, `?limit=${TableRowLimit}`);
     let isRefreshDie = false;
     const {
         data, newAccessToken, session
-    } = await AuthGetApi<IResponsePayload<any>>(`${dataUrl}?${urlParams}`).then((response) => {
+    } = await AuthGetApi<IResponsePayload<any>>(`${dataUrl}?${urlParams.toString()}`).then((response) => {
         console.log('TableContainer: RESPONSE: newAccessToken', { [dataUrl]: response.newAccessToken });
-        console.log('TableContainer: RESPONSE: session', { [dataUrl]: response.session });
+        console.log('TableContainer: RESPONSE: oldAccessToken', { [dataUrl]: response.session?.user[EAuthCookie.ACCESS] });
         console.log('TableContainer: RESPONSE: count', { [dataUrl]: response.data.count });
-        console.log('TableContainer: RESPONSE: data_length', { [dataUrl]: response.data.result.length });
+        console.log('TableContainer: RESPONSE: data_length', { [dataUrl]: response.data.result?.length });
         return response;
     }).catch(e => {
         console.log('TableContainer: ERROR', e);
@@ -50,7 +50,7 @@ async function TableContainer({
         return { data: { result: [] } } as IAuthGetApiReturn;
     });
 
-    const columns = Object.keys(data.result[0] || [])
+    const columns = Object.keys(data.result?.[0] || [])
         .filter((k) => k !== 'id' && !ignoreColumns.includes(k));
 
     return (
@@ -60,16 +60,16 @@ async function TableContainer({
             isRefreshDie={ isRefreshDie }
         >
             { provider === Providers.admins && [ ERole.SUPER_ADMIN, ERole.MANAGER ].includes(session?.user.role as ERole)
-                ? <AddButton />
+                ? <AddAdmin />
                 : null }
             <TableHead
-                searchParams={ searchParams }
+                searchParams={ urlParams.toObject() }
                 provider={ provider }
                 dataUrl={ dataUrl }
                 columns={ columns }
             />
             <Table
-                searchParams={ searchParams }
+                searchParams={ urlParams.toObject() }
                 dataUrl={ dataUrl }
                 provider={ provider }
                 data={ data }

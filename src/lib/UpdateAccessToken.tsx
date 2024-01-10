@@ -1,12 +1,12 @@
 'use client';
-import {
-    signOut, useSession 
-} from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import {
     FC, PropsWithChildren, useLayoutEffect
 } from 'react';
 
 import { EAuthCookie } from '@/types/common';
+import logout from '@/lib/util/logout';
+import setAccessToken from '@/lib/util/setAccessToken';
 
 
 const UpdateAccessToken: FC<PropsWithChildren<{
@@ -29,7 +29,7 @@ const UpdateAccessToken: FC<PropsWithChildren<{
     useLayoutEffect(() => {
         if (session?.user && session.user.maxAge <= 0) {
             console.log('UpdateAccessToken: session expired');
-            signOut();
+            logout();
         }
 
         if (
@@ -39,11 +39,12 @@ const UpdateAccessToken: FC<PropsWithChildren<{
             && session?.user[EAuthCookie.ACCESS] === oldAccessToken
             && session?.user[EAuthCookie.ACCESS] !== newAccessToken
         ) {
+            setAccessToken(newAccessToken);
             update({ accessToken: newAccessToken })
-                .then((d) => {
-                    console.log(session?.user.maxAge, 'UpdateAccessToken[update]', newAccessToken, d);
+                .then((data) => {
+                    console.log('UpdateAccessToken[update]', data?.user[EAuthCookie.ACCESS]);
                 }).catch((e) => {
-                    console.log(session?.user.maxAge, 'UpdateAccessToken[update]: ERROR', e);
+                    console.log('UpdateAccessToken[update]: ERROR', e);
                 });
         }
     }, [ newAccessToken, oldAccessToken, rememberMe, session, status, update ]);
@@ -52,7 +53,7 @@ const UpdateAccessToken: FC<PropsWithChildren<{
         if (rememberMe) {
             if (isRefreshDie) {
                 console.log('UpdateAccessToken: refresh token died');
-                signOut();
+                logout();
             }
         }
     }, [ isRefreshDie, rememberMe ]);

@@ -22,9 +22,7 @@ const handler = async (req: NextRequest, res: NextResponse) => {
     const response = await NextAuth(req as unknown as NextApiRequest, res as unknown as NextApiResponse, {
         ...authOptions,
         session: { maxAge: token?.maxAge || authOptions.session!.maxAge! },
-        // session: { maxAge: token ? (token.exp as number) - Math.floor(Date.now() / 1000) : authOptions.session!.maxAge! },
     });
-
     if (token && (token._v !== process.env.NEXTAUTH_COOKIE_VERSION || token.maxAge <= 0)) {
         console.log('[...nextauth]', 'FORCE LOGOUT');
         const secureCookie = process.env.NEXTAUTH_URL?.startsWith('https://') ?? !!process.env.VERCEL;

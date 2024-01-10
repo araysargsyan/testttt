@@ -1,6 +1,8 @@
-import { Suspense } from 'react';
 import {
-    type Metadata, type NextPage 
+    memo, Suspense 
+} from 'react';
+import {
+    type Metadata, type NextPage
 } from 'next';
 
 import Spinner from '@/components/Spiner';
@@ -25,6 +27,6 @@ const UserPage: NextPage<IPageProps> = ({ searchParams }) => {
     );
 };
 
-export default UserPage;
+export default memo(UserPage);
 
 export const metadata: Metadata = { title: 'Users', };

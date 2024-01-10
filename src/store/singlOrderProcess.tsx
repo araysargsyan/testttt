@@ -38,13 +38,15 @@ const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, {
 }) => {
     switch (type) {
         case SingleOrderProcessActions.UPDATE:
-            console.log('SingleOrderProcess: reducer', {
-                payload, type, state
-            });
-
+            // console.log('SingleOrderProcess: reducer', {
+            //     payload, type, state
+            // });
             return {
                 ...state,
-                data: { ...payload }
+                data: {
+                    ...state.data,
+                    ...payload
+                }
             };
         default:
             return state;
@@ -53,7 +55,7 @@ const reducer: Reducer<TInitialState, IActionWithPayload<TAction>> = (state, {
 
 
 const update = async (dispatch: Dispatch<any>, data: IOrderProcess) => {
-    console.log('update', { data });
+    // console.log('update', { data });
     // const payload = await authService.signIn(data);
     data && dispatch({
         type: SingleOrderProcessActions.UPDATE, payload: data
@@ -72,9 +74,9 @@ const SingleOrderProcessProvider: FC<ISingleOrderProcessProviderProps> = ({
         dispatch: async (actionType, payload?) => {
             switch (actionType) {
                 case SingleOrderProcessActions.UPDATE:
-                    console.log('SingleOrderProcessProvider:reducer', {
-                        payload, actionType, state
-                    });
+                    // console.log('SingleOrderProcessProvider:reducer', {
+                    //     payload, actionType, state
+                    // });
                     await update(dispatcher, payload);
                     // await sleep(2000)
                     // await push(ERoutes.HOME);

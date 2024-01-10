@@ -1,9 +1,11 @@
+import { memo } from 'react';
+
 import {
-    AuthGetApi, IAuthGetApiReturn 
+    AuthGetApi, IAuthGetApiReturn
 } from '@/lib/fetchApi';
 import OrderProcessCard from '@/components/OrderProcess/OrderProcessCard';
 import {
-    EAuthCookie, IOrderProcess 
+    EAuthCookie, IOrderProcess
 } from '@/types/common';
 import { SingleOrderProcessProvider } from '@/store/singlOrderProcess';
 import UpdateAccessToken from '@/lib/UpdateAccessToken';
@@ -16,11 +18,11 @@ interface IOrderProcessProps {
 async function SingleOrderProcessContainer({ id }: IOrderProcessProps) {
     let isRefreshDie = false;
     const {
-        data, newAccessToken, session 
+        data, newAccessToken, session
     } = await AuthGetApi<IOrderProcess>(`/order-process/${id}`).then((response) => {
-        console.log('SingleOrderProcessContainer: RESPONSE: data', { [`/order-process/${id}`]: response.data });
+        console.log('SingleOrderProcessContainer: RESPONSE: data_exist', { [`/order-process/${id}`]: Boolean(Object.keys(response.data)) });
         console.log('SingleOrderProcessContainer: RESPONSE: newAccessToken', { [`/order-process/${id}`]: response.newAccessToken });
-        console.log('SingleOrderProcessContainer: RESPONSE: session', { [`/order-process/${id}`]: response.session });
+        console.log('TableContainer: RESPONSE: oldAccessToken', { [`/order-process/${id}`]: response.session?.user[EAuthCookie.ACCESS] });
         return response;
     }).catch(e => {
         console.log('SingleOrderProcessContainer: ERROR', e);
@@ -32,7 +34,7 @@ async function SingleOrderProcessContainer({ id }: IOrderProcessProps) {
 
     return (
         <SingleOrderProcessProvider payload={{
-            data, error: '' 
+            data, error: ''
         }}
         >
             <UpdateAccessToken
@@ -48,4 +50,4 @@ async function SingleOrderProcessContainer({ id }: IOrderProcessProps) {
     );
 }
 
-export default SingleOrderProcessContainer;
+export default memo(SingleOrderProcessContainer);

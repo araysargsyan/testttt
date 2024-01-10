@@ -88,7 +88,6 @@ export interface IProcessSteps {
     id: string;
     status: keyof typeof OrderProcessStepsStatus;
     step: number;
-    inputsData: IInputsData;
     staticData: IStaticData;
     comment: string | null;
     documents: any[];
@@ -106,6 +105,7 @@ export interface IOrderProcess {
     updatedAt: Date | null;
     deletedAt: Date | null;
     documents: IOrderProcessDocuments[];
+    inputsData: IInputsData;
     status: keyof typeof OrderProcessStatus;
     name: string;
     processSteps: IProcessSteps[];

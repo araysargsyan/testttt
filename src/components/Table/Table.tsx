@@ -12,14 +12,16 @@ import {
 import {
     usePathname, useRouter
 } from 'next/navigation';
-import dayjs from 'dayjs'; // Import day.js library
+import dayjs from 'dayjs';
 
 import upperCaseFirstLetter from '@/lib/util/upperCaseFirstLetter';
 import {
     TProviders, useProviderData, useProviderDispatch
 } from '@/store';
-import useAxiosAuth from '@/hooks/useAxiosAuth';
 import getSearchParams from '@/lib/getSearchParams';
+import axios from '@/lib/axios';
+import { EAuthCookie } from '@/types/common';
+import { useUpdateSession } from '@/store/updateSession';
 
 import styles from './Table.module.scss';
 import { TableRowLimit } from './';
@@ -42,7 +44,6 @@ const Table: FC<{
     columns,
     isRowClickable,
 }) => {
-    const router = useRouter();
     const pathname = usePathname();
     const {
         result: tableData, count
@@ -51,45 +52,41 @@ const Table: FC<{
         dispatch, actions
     } = useProviderDispatch(provider);
     const { push } = useRouter();
-    const axios = useAxiosAuth();
+    const { current: updateSession } = useUpdateSession();
 
     const orderChange: TableProps<DataType>['onChange'] = (
         pagination,
-        filters,
+        _,
         sorter,
         extra
     ) => {
         if (!Array.isArray(sorter) && extra.action === 'sort') {
-            const params: {
-                limit: string;
-                orderBy?: string;
-                orderDirection?: 'ASC' | 'DESC';
-            } = {
-                ...searchParams,
-                limit: String(pagination.pageSize),
-                orderBy: sorter.field as string,
-            };
+            const urlParams = getSearchParams(searchParams, location.search);
+            urlParams.set('limit', String(pagination.pageSize));
+            urlParams.set('orderBy', String(sorter.field));
 
             if (sorter) {
                 if (sorter.order) {
-                    params.orderDirection = sorter.order === 'ascend' ? 'ASC' : 'DESC';
+                    urlParams.set('orderDirection', sorter.order === 'ascend' ? 'ASC' : 'DESC');
                 } else {
-                    params.orderBy = '';
-                    const urlParams = getSearchParams(params);
-                    router.push(`${pathname}?${urlParams.toString()}`);
+                    urlParams.set('orderBy', '');
                 }
             }
 
-            axios.get(dataUrl, { params }).then(({ data }) => {
+            // console.log('orderChange', { params: urlParams.toObject() });
+            axios.get(dataUrl, { params: urlParams.toObject() }).then(({
+                data, newAccessToken
+            }) => {
+                if (newAccessToken) {
+                    updateSession({ [EAuthCookie.ACCESS]: newAccessToken });
+                }
                 dispatch(actions.UPDATE, { data });
-                const urlParams = getSearchParams(params);
-                router.push(`${pathname}?${urlParams.toString()}`);
+                window.history.pushState({}, '', `${pathname}?${urlParams.toString()}`);
             });
         }
     };
 
     const handleRowClick = (record: DataType) => {
-        // console.log('Row clicked:', record);
         push(`${dataUrl}/${record.id}`);
     };
 
@@ -101,22 +98,34 @@ const Table: FC<{
                 key: key,
                 sorter: true,
                 render: (text, _) => {
-                    // Format date for display in the table
+                    if ([ 'value' ].includes(key) && typeof text === 'object') {
+                        return JSON.stringify(text, null, 2);
+                    }
+
                     if ([ 'createdAt', 'updatedAt', 'deletedAt', 'blockedAt' ].includes(key)) {
                         return dayjs(text).format('YYYY-MM-DD');
                     }
-                    return text;
+                    return String(text);
                 },
             };
+            delete column.sortOrder;
+            const urlParams = new URLSearchParams(typeof location !== 'undefined' ? location.search : undefined);
 
-            if (searchParams.orderDirection && searchParams.orderBy === key) {
-                column.sortOrder =
-                    searchParams.orderDirection === 'ASC' ? 'ascend' : 'descend';
+            if (urlParams.get('orderDirection') && urlParams.get('orderBy') === key) {
+                column.sortOrder = urlParams.get('orderDirection') === 'ASC'
+                    ? 'ascend' : 'descend';
+            }
+            if (typeof location === 'undefined' && searchParams.orderDirection && searchParams.orderBy === key) {
+                column.sortOrder = searchParams.orderDirection === 'ASC'
+                    ? 'ascend' : 'descend';
             }
 
             return column;
         }),
-        {
+    ];
+
+    if (columns.length) {
+        columnsWithActions.push({
             title: 'Actions',
             dataIndex: 'actions',
             key: 'actions',
@@ -134,36 +143,50 @@ const Table: FC<{
                     { !isRowClickable ? <Button danger>Edit</Button> : '' }
                 </div>
             ),
-        },
-    ];
+        });
+    }
 
     const onPaginationChange: PaginationProps['onChange'] = (page, pageSize) => {
-        const params = {
-            ...searchParams,
-            offset: String((page - 1) * pageSize),
-            limit: String(pageSize),
-        };
+        const urlParams = getSearchParams(searchParams, location.search);
+        urlParams.set('offset', String((page - 1) * pageSize));
+        urlParams.set('limit', String(pageSize));
 
-        axios.get(dataUrl, { params }).then(({ data }) => {
+        // console.log('onPaginationChange', { params: urlParams.toObject() });
+        axios.get(dataUrl, { params: urlParams.toObject() }).then(({
+            data, newAccessToken
+        }) => {
+            if (newAccessToken) {
+                updateSession({ [EAuthCookie.ACCESS]: newAccessToken });
+            }
             dispatch(actions.UPDATE, { data });
-
-            const urlParams = getSearchParams(params);
-            router.push(`${pathname}?${urlParams.toString()}`);
+            window.history.pushState({}, '', `${pathname}?${urlParams.toString()}`);
         });
     };
 
     const paginationOptions = useMemo(
-        () => ({
-            total: count,
-            current:
-                (Number(searchParams.offset || 0) /
-                    Number(searchParams.limit || TableRowLimit)) +
-                1,
-            defaultCurrent: 1,
-            pageSize: Number(searchParams.limit || TableRowLimit),
-            defaultPageSize: Number(TableRowLimit),
-        }),
-        [ count, searchParams.limit, searchParams.offset ]
+        () => {
+            const urlParams = new URLSearchParams(typeof location !== 'undefined' ? location.search : undefined);
+            const pageSize = Number(
+                urlParams.get('limit')
+                || (typeof location === 'undefined' && searchParams.limit)
+                || TableRowLimit
+            );
+            const offset = Number(
+                urlParams.get('offset')
+                || (typeof location === 'undefined' && searchParams.offset)
+                || 0
+            );
+
+            return {
+                total: count,
+                current: (offset / pageSize) + 1,
+                defaultCurrent: 1,
+                pageSize,
+                defaultPageSize: Number(TableRowLimit),
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [ count, tableData, searchParams ]
     );
 
     return (

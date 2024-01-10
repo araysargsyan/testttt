@@ -25,9 +25,9 @@ type TAction = TActionType<typeof TransactionsActions, typeof __HYDRATE__>;
 const reducer: TReducer<TInitialState, TAction> = (state, {
     payload, type
 }) => {
-    console.log('Transactions: reducer', {
-        payload, type, state
-    });
+    // console.log('Transactions: reducer', {
+    //     payload, type, state
+    // });
     switch (type) {
         case __HYDRATE__:
             return {

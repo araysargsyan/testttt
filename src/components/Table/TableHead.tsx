@@ -1,7 +1,7 @@
 'use client';
 
 import {
-    FC, useMemo, useState
+    FC, memo, useEffect, useMemo, useState
 } from 'react';
 import {
     Select, DatePicker, Button
@@ -10,16 +10,15 @@ import Search from 'antd/lib/input/Search';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import locale from 'antd/lib/date-picker/locale/en_US';
-import {
-    useRouter, usePathname
-} from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
-import useAxiosAuth from '@/hooks/useAxiosAuth';
-import { TableRowLimit } from '@/components/Table/index';
 import {
     TProviders, useProviderDispatch
 } from '@/store';
 import getSearchParams from '@/lib/getSearchParams';
+import { EAuthCookie } from '@/types/common';
+import axios from '@/lib/axios';
+import { useUpdateSession } from '@/store/updateSession';
 
 import styles from './Table.module.scss';
 
@@ -35,9 +34,9 @@ type RangeValue = [Dayjs | null, Dayjs | null];
 const TableHead: FC<ITableHeadProps> = ({
     columns, dataUrl, provider, searchParams
 }) => {
-    const router = useRouter();
+    // useUpdateAccessTokenAfterUnmount();
+    // const { current: updateSession } = useUpdateSession();
     const pathname = usePathname();
-    const axios = useAxiosAuth();
     const {
         dispatch, actions
     } = useProviderDispatch(provider);
@@ -61,19 +60,21 @@ const TableHead: FC<ITableHeadProps> = ({
     };
 
     const handleSearch = () => {
-        const params: {search: string; searchBy?: string; limit: string} & ITableHeadProps['searchParams'] = {
-            ...searchParams,
-            search,
-            limit: TableRowLimit,
-        };
+        const urlParams = getSearchParams(searchParams, location.search);
+        urlParams.set('search', search);
         if (searchBy !== 'all') {
-            params.searchBy = searchBy;
+            urlParams.set('searchBy', searchBy);
         }
 
-        axios.get(dataUrl, { params }).then(({ data }) => {
+        // console.log('handleSearch', { params: urlParams.toObject() });
+        axios.get(dataUrl, { params: urlParams.toObject() }).then(({
+            data, newAccessToken
+        }) => {
+            // if (newAccessToken) {
+            //     updateSession({ [EAuthCookie.ACCESS]: newAccessToken });
+            // }
             dispatch(actions.UPDATE, { data });
-            const urlParams = getSearchParams(params);
-            router.push(`${pathname}?${urlParams.toString()}`);
+            window.history.pushState({}, '', `${pathname}?${urlParams.toString()}`);
         });
     };
     const disabledDate = (current: Dayjs) => {
@@ -81,30 +82,32 @@ const TableHead: FC<ITableHeadProps> = ({
     };
 
     const onDone = (clear = false) => {
+        const urlParams = getSearchParams(searchParams, location.search);
+
         if (clear) {
             setDates([ null, null ]);
             delete searchParams.startDate;
             delete searchParams.endDate;
-        }
-
-        const params: {startDate?: string; endDate?: string; limit: string} & ITableHeadProps['searchParams'] = {
-            ...searchParams,
-            limit: TableRowLimit
-        };
-
-        if (!clear) {
+            urlParams.delete('startDate');
+            urlParams.delete('endDate');
+        } else {
             if (dates[0]) {
-                params.startDate = dates[0]?.toString();
+                urlParams.set('startDate', dates[0]?.toString());
             }
             if (dates[1]) {
-                params.endDate = dates[1]?.toString();
+                urlParams.set('endDate', dates[1]?.toString());
             }
         }
 
-        axios.get(dataUrl, { params }).then(({ data }) => {
+        // console.log('onDone', { params: urlParams.toObject() });
+        axios.get(dataUrl, { params: urlParams.toObject() }).then(({
+            data, newAccessToken
+        }) => {
+            // if (newAccessToken) {
+            //     updateSession({ [EAuthCookie.ACCESS]: newAccessToken });
+            // }
             dispatch(actions.UPDATE, { data });
-            const urlParams = getSearchParams(params);
-            router.push(`${pathname}?${urlParams.toString()}`);
+            window.history.pushState({}, '', `${pathname}?${urlParams.toString()}`);
         });
     };
     const onOpenChange = (open: boolean) => {
@@ -113,6 +116,10 @@ const TableHead: FC<ITableHeadProps> = ({
         }
         setOpen(open);
     };
+
+    useEffect(() => {
+        console.log('RERENDER', TableHead.name);
+    });
 
     return (
         <div className={ styles['table-head'] }>
@@ -183,4 +190,4 @@ const TableHead: FC<ITableHeadProps> = ({
     );
 };
 
-export default TableHead;
+export default memo(TableHead);

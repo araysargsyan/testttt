@@ -40,7 +40,6 @@ export async function AuthGetApi<
     const session = await getServerSession(authOptions);
 
     console.log(BASE_URL + url, 'URL');
-    console.log(session?.user.accessToken, 'currentAccessToken');
     let res = await fetch(BASE_URL + url, {
         method: 'GET',
         headers: {
@@ -48,12 +47,10 @@ export async function AuthGetApi<
             'Content-Type': 'application/json'
         },
         cache,
-        // next: { revalidate: 10 }
     });
 
     if (res.status === 401) {
         const newAccessToken = await refreshToken(session!.user[EAuthCookie.REFRESH]);
-        console.log('after:refresh', { newAccessToken });
 
         if (newAccessToken) {
             res = await fetch(BASE_URL + url, {

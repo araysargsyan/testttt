@@ -16,18 +16,18 @@ const initialState: IStateSchema<{count: number; result: Record<string, any>[]}>
     error: ''
 };
 const UsersActions = {
-    ADD: 'ADD', UPDATE: 'UPDATE' 
+    ADD: 'ADD', UPDATE: 'UPDATE'
 } as const;
 
 type TInitialState = typeof initialState;
 type TAction = TActionType<typeof UsersActions, typeof __HYDRATE__>;
 
 const reducer: TReducer<TInitialState, TAction> = (state, {
-    payload, type 
+    payload, type
 }) => {
-    console.log('Users: reducer', {
-        payload, type, state
-    });
+    // console.log('Users: reducer', {
+    //     payload, type, state
+    // });
     switch (type) {
         case __HYDRATE__:
             return {
